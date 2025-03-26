@@ -1,0 +1,68 @@
+:root {
+  /* 基础尺寸 */
+  --hx-size-1: 2px;
+  --hx-size-2: 4px;
+  --hx-size-3: 6px;
+  --hx-size-4: 8px;
+  --hx-size-5: 12px;
+  --hx-size-6: 16px;
+  --hx-size-7: 20px;
+  --hx-size-8: 24px;
+  --hx-size-9: 28px;
+  --hx-size-10: 32px;
+  --hx-size-11: 36px;
+  --hx-size-12: 40px;
+  --hx-size-13: 48px;
+  --hx-size-14: 56px;
+  --hx-size-15: 64px;
+  --hx-size-16: 72px;
+
+  /* 组件尺寸高度 */
+  --hx-comp-size-xxxs: var(--hx-size-6);
+  --hx-comp-size-xxs: var(--hx-size-7);
+  --hx-comp-size-xs: var(--hx-size-8);
+  --hx-comp-size-s: var(--hx-size-9);
+  --hx-comp-size-m: var(--hx-size-10);
+  --hx-comp-size-l: var(--hx-size-11);
+  --hx-comp-size-xl: var(--hx-size-12);
+  --hx-comp-size-xxl: var(--hx-size-13);
+  --hx-comp-size-xxxl: var(--hx-size-14);
+  --hx-comp-size-xxxxl: var(--hx-size-15);
+  --hx-comp-size-xxxxxl: var(--hx-size-16);
+
+  /* 弹出层整体边距 */
+  --hx-pop-padding-s: var(--hx-size-2);
+  --hx-pop-padding-m: var(--hx-size-3);
+  --hx-pop-padding-l: var(--hx-size-4);
+  --hx-pop-padding-xl: var(--hx-size-5);
+  --hx-pop-padding-xxl: var(--hx-size-6);
+
+  /* 组件左右边距 */
+  --hx-comp-paddingLR-xxs: var(--hx-size-1);
+  --hx-comp-paddingLR-xs: var(--hx-size-2);
+  --hx-comp-paddingLR-s: var(--hx-size-4);
+  --hx-comp-paddingLR-m: var(--hx-size-5);
+  --hx-comp-paddingLR-l: var(--hx-size-6);
+  --hx-comp-paddingLR-xl: var(--hx-size-8);
+  --hx-comp-paddingLR-xxl: var(--hx-size-10);
+
+  /* 组件上下边距 */
+  --hx-comp-paddingTB-xxs: var(--hx-size-1);
+  --hx-comp-paddingTB-xs: var(--hx-size-2);
+  --hx-comp-paddingTB-s: var(--hx-size-4);
+  --hx-comp-paddingTB-m: var(--hx-size-5);
+  --hx-comp-paddingTB-l: var(--hx-size-6);
+  --hx-comp-paddingTB-xl: var(--hx-size-8);
+  --hx-comp-paddingTB-xxl: var(--hx-size-10);
+
+  /* 组件间距 */
+  --hx-comp-margin-xxs: var(--hx-size-1);
+  --hx-comp-margin-xs: var(--hx-size-2);
+  --hx-comp-margin-s: var(--hx-size-4);
+  --hx-comp-margin-m: var(--hx-size-5);
+  --hx-comp-margin-l: var(--hx-size-6);
+  --hx-comp-margin-xl: var(--hx-size-7);
+  --hx-comp-margin-xxl: var(--hx-size-8);
+  --hx-comp-margin-xxxl: var(--hx-size-10);
+  --hx-comp-margin-xxxxl: var(--hx-size-12);
+} 
