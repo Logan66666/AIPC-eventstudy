@@ -21,7 +21,7 @@
   box-sizing: border-box;
 }
 
-/* 滚动条样式 */
+/* 滚动条样式 - 简约风格 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -33,8 +33,8 @@
 
 ::-webkit-scrollbar-thumb {
   background: var(--hx-scrollbar-color);
-  border-radius: var(--hx-radius-small);
-
+  border-radius: 4px;
+  
   &:hover {
     background: var(--hx-scrollbar-hover-color);
   }
@@ -42,24 +42,27 @@
 
 /* 基础文本样式 */
 body {
-  font-family: var(--hx-font-family);
+  font-family: var(--hx-font-family), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   font-size: var(--hx-font-size-body-medium);
   line-height: var(--hx-line-height-body-medium);
   color: var(--hx-text-color-primary);
   background-color: var(--hx-bg-color-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* 文本选择样式 */
 ::selection {
-  background-color: var(--hx-brand-color-1);
+  background-color: rgba(0, 113, 227, 0.2);
   color: var(--hx-text-color-primary);
 }
 
-/* 链接样式 */
+/* 链接样式 - 简约风格 */
 a {
-  color: var(--hx-brand-color-3);
+  color: var(--hx-brand-color-1);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 
   &:hover {
     color: var(--hx-brand-color-hover);
@@ -71,24 +74,33 @@ a {
 }
 
 /* 标题样式 */
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: var(--hx-size-3);
+  font-weight: 600;
+}
+
 h1 {
   font: var(--hx-font-headline-large);
   color: var(--hx-text-color-primary);
+  letter-spacing: -0.022em;
 }
 
 h2 {
   font: var(--hx-font-headline-medium);
   color: var(--hx-text-color-primary);
+  letter-spacing: -0.019em;
 }
 
 h3 {
   font: var(--hx-font-headline-small);
   color: var(--hx-text-color-primary);
+  letter-spacing: -0.016em;
 }
 
 h4 {
   font: var(--hx-font-title-large);
   color: var(--hx-text-color-primary);
+  letter-spacing: -0.011em;
 }
 
 h5 {
@@ -105,6 +117,7 @@ h6 {
 p {
   margin-bottom: var(--hx-size-4);
   color: var(--hx-text-color-secondary);
+  line-height: 1.5;
 }
 
 /* 列表样式 */
@@ -118,29 +131,33 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: var(--hx-size-4);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 th, td {
   padding: var(--hx-size-3) var(--hx-size-4);
-  border: 1px solid var(--hx-border-level-1-color);
+  border-bottom: 1px solid var(--hx-border-level-1-color);
 }
 
 th {
   background-color: var(--hx-bg-color-container);
   font-weight: 600;
   text-align: left;
+  color: var(--hx-text-color-secondary);
 }
 
 /* 表单元素基础样式 */
 input, textarea, select {
-  font-family: var(--hx-font-family);
+  font-family: var(--hx-font-family), -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: var(--hx-font-size-body-medium);
   color: var(--hx-text-color-primary);
   background-color: var(--hx-bg-color-container);
   border: 1px solid var(--hx-border-level-1-color);
-  border-radius: var(--hx-radius-default);
+  border-radius: 8px;
   padding: var(--hx-size-2) var(--hx-size-3);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 
   &:hover {
     border-color: var(--hx-border-level-2-color);
@@ -148,8 +165,8 @@ input, textarea, select {
 
   &:focus {
     outline: none;
-    border-color: var(--hx-brand-color-3);
-    box-shadow: 0 0 0 2px var(--hx-brand-color-1);
+    border-color: var(--hx-brand-color-1);
+    box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
   }
 
   &:disabled {
@@ -160,15 +177,20 @@ input, textarea, select {
   }
 }
 
-/* 按钮基础样式 */
+/* 按钮基础样式 - 简约风格 */
 button {
-  font-family: var(--hx-font-family);
+  font-family: var(--hx-font-family), -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: var(--hx-font-size-body-medium);
+  font-weight: 500;
   padding: var(--hx-size-2) var(--hx-size-4);
-  border-radius: var(--hx-radius-default);
+  border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
 
   &:disabled {
     cursor: not-allowed;
@@ -186,7 +208,7 @@ button {
 .bg-container { background-color: var(--hx-bg-color-container); }
 
 .border { border: 1px solid var(--hx-border-level-1-color); }
-.border-radius { border-radius: var(--hx-radius-default); }
+.border-radius { border-radius: 8px; }
 
 .m-1 { margin: var(--hx-size-1); }
 .m-2 { margin: var(--hx-size-2); }
@@ -198,12 +220,44 @@ button {
 .p-3 { padding: var(--hx-size-3); }
 .p-4 { padding: var(--hx-size-4); }
 
-/* 动画过渡 */
-.transition {
-  transition: all 0.3s ease;
+/* 卡片样式 - 简约高级风格 */
+.card {
+  background-color: var(--hx-bg-color-container) !important;
+  border-radius: 8px;
+  padding: var(--hx-size-5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transition: box-shadow 0.2s ease;
+  color: var(--hx-text-color-primary);
+  
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--hx-text-color-primary);
+    margin-bottom: var(--hx-size-2);
+    letter-spacing: -0.011em;
+  }
+  
+  .card-subtitle {
+    font-size: 14px;
+    color: var(--hx-text-color-tertiary);
+    margin-bottom: var(--hx-size-4);
+  }
 }
 
 /* 主题切换过渡 */
 :root {
-  transition: all 0.3s ease;
-} 
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: var(--hx-bg-color-container);
+  color: var(--hx-text-color-tertiary);
+  border: 1px solid var(--hx-border-level-1-color);
+}
