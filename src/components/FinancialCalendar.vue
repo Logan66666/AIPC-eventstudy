@@ -1,47 +1,46 @@
 <template>
-  <div class="card financial-calendar">
+  <div class="financial-calendar card">
     <div class="calendar-header">
-      <div class="title-area">
-        <h2 class="card-title">财经日历</h2>
-        <p class="card-subtitle">重要财经事件日历</p>
-      </div>
+      <h2 class="card-title tertiary-title">财经日历</h2>
+      <div class="card-subtitle">重要经济数据与财报发布安排</div>
       
-      <div class="calendar-controls">
-        <button class="calendar-nav prev" @click="prevMonth">
-          <span class="nav-icon">&#10094;</span>
+      <div class="date-selector">
+        <button class="date-nav prev" @click="navigateMonth(-1)">
+          <span class="nav-icon">←</span>
         </button>
-        <span class="calendar-current">{{ currentYearMonth }}</span>
-        <button class="calendar-nav next" @click="nextMonth">
-          <span class="nav-icon">&#10095;</span>
+        <div class="current-date">{{ currentYearMonth }}</div>
+        <button class="date-nav next" @click="navigateMonth(1)">
+          <span class="nav-icon">→</span>
         </button>
       </div>
     </div>
     
-    <div class="calendar-grid">
-      <div class="weekday-header">
-        <div v-for="day in weekDays" :key="day" class="weekday-cell">{{ day }}</div>
+    <div class="calendar-content">
+      <!-- 星期表头 -->
+      <div class="calendar-weekdays">
+        <div class="weekday" v-for="day in weekDays" :key="day">{{ day }}</div>
       </div>
       
-      <div class="days-grid">
+      <!-- 日历网格 -->
+      <div class="calendar-grid">
         <div 
           v-for="(day, index) in calendarDays" 
           :key="index"
-          :class="[
-            'day-cell', 
-            { 'prev-month': day.isPrevMonth },
-            { 'next-month': day.isNextMonth },
-            { 'today': day.isToday },
-            { 'has-events': day.events.length > 0 },
-            { 'selected': selectedDate === day.fullDate }
-          ]"
-          @click="selectDate(day)"
+          class="calendar-day"
+          :class="{
+            'other-month': day.isOtherMonth,
+            'has-events': day.events.length > 0,
+            'today': isToday(day.date)
+          }"
+          @click="selectDay(day)"
         >
-          <div class="day-number">{{ day.day }}</div>
-          <div class="day-events">
+          <div class="day-number">{{ day.dayNumber }}</div>
+          <div class="day-events" v-if="day.events.length > 0">
             <div 
               v-for="(event, eventIndex) in day.events.slice(0, 2)" 
-              :key="eventIndex" 
-              :class="['event-tag', event.type]"
+              :key="eventIndex"
+              class="event-dot"
+              :class="getImportanceClass(event.importance)"
             >
               {{ event.title }}
             </div>
@@ -51,29 +50,30 @@
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- 选中日期详情 -->
-    <div v-if="selectedDay && selectedDay.fullDate" class="selected-day-details">
-      <div class="selected-day-header">
-        <span>{{ selectedDay.fullDate }} 事件</span>
-        <button class="close-btn" @click="closeDetails">×</button>
-      </div>
-      <div v-if="selectedDay.events.length > 0" class="selected-day-events">
-        <div 
-          v-for="(event, index) in selectedDay.events" 
-          :key="index" 
-          :class="['event-detail', event.type]"
-        >
-          <span class="event-time">{{ event.time }}</span>
-          <div class="event-content">
-            <div class="event-title">{{ event.title }}</div>
-            <div class="event-description">{{ event.description }}</div>
+      
+      <!-- 选中日期的事件详情 -->
+      <div class="events-detail" v-if="selectedDay && selectedDay.events.length > 0">
+        <div class="detail-header">
+          <h3>{{ formatSelectedDate(selectedDay.date) }} 事件详情</h3>
+        </div>
+        <div class="event-list">
+          <div 
+            v-for="(event, index) in selectedDay.events" 
+            :key="index"
+            class="event-item"
+            :class="getImportanceClass(event.importance)"
+          >
+            <div class="event-time">{{ event.time }}</div>
+            <div class="event-info">
+              <div class="event-title">{{ event.title }}</div>
+              <div class="event-description">{{ event.description }}</div>
+              <div class="event-meta">
+                <span class="event-country">{{ event.country }}</span>
+                <span class="event-importance">{{ getImportanceText(event.importance) }}</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div v-else class="no-events">
-        当日无重要事件
       </div>
     </div>
   </div>
@@ -85,490 +85,399 @@ export default {
   data() {
     return {
       currentDate: new Date(),
+      selectedDay: null,
       weekDays: ['日', '一', '二', '三', '四', '五', '六'],
       events: [
-        { 
-          date: '2023-03-01', 
-          time: '22:00', 
-          title: '美国ISM制造业PMI', 
-          description: '预期46.9，前值47.4，关注就业和价格分项',
-          type: 'economic'
+        {
+          date: new Date(2024, 2, 3),
+          time: '20:45',
+          title: '欧洲行情利率决议',
+          description: '预期维持利率不变，关注政策前瞻指引',
+          country: '欧元区',
+          importance: 'high'
         },
-        { 
-          date: '2023-03-02', 
-          time: '20:45', 
-          title: '欧洲央行利率决议', 
-          description: '预期加息50个基点至3.00%，关注后续加息路径指引',
-          type: 'policy'
+        {
+          date: new Date(2024, 2, 3),
+          time: '22:00',
+          title: '欧元区CPI数据',
+          description: '预期同比增长4.1%，环比增长0.3%',
+          country: '欧元区',
+          importance: 'medium'
         },
-        { 
-          date: '2023-03-03', 
-          time: '11:00', 
-          title: '日本央行利率决议', 
-          description: '预期维持-0.1%不变，关注收益率曲线控制政策',
-          type: 'policy'
+        {
+          date: new Date(2024, 2, 4),
+          time: '11:00',
+          title: '日本央行利率决议',
+          description: '预期维持利率不变，关注通胀预期',
+          country: '日本',
+          importance: 'high'
         },
-        { 
-          date: '2023-03-08', 
-          time: '09:30', 
-          title: '中国CPI、PPI', 
-          description: '预计CPI同比增长1.9%，PPI同比下降1.3%',
-          type: 'economic'
-        },
-        { 
-          date: '2023-03-09', 
-          time: '21:30', 
-          title: '美国非农就业数据', 
-          description: '预期新增20.5万人，失业率3.4%',
-          type: 'economic'
-        },
-        { 
-          date: '2023-03-12', 
-          time: '21:30', 
-          title: '美国CPI数据', 
-          description: '预期同比6.2%，核心CPI同比5.5%',
-          type: 'economic'
-        },
-        { 
-          date: '2023-03-14', 
-          time: '20:45', 
-          title: '欧洲央行利率决议', 
-          description: '预期加息25个基点，关注后续指引',
-          type: 'policy'
-        },
-        { 
-          date: '2023-03-16', 
-          time: '09:20', 
-          title: '中国MLF操作', 
-          description: '关注操作量和利率变化',
-          type: 'policy'
-        },
-        { 
-          date: '2023-03-16', 
-          time: '02:00', 
-          title: '美联储FOMC会议', 
-          description: '预期加息25个基点，关注点阵图变化',
-          type: 'policy'
-        },
-        { 
-          date: '2023-03-17', 
-          time: '17:45', 
-          title: '腾讯业绩发布', 
-          description: '预期营收增长缓慢，利润可能回升',
-          type: 'business'
-        },
-        { 
-          date: '2023-03-19', 
-          time: '16:30', 
-          title: '平台业绩发布', 
-          description: '关注用户增长和商业化进展',
-          type: 'business'
-        },
-        { 
-          date: '2023-03-22', 
-          time: '09:30', 
-          title: '中国PMI数据', 
-          description: '制造业PMI预期50.2，非制造业PMI预期54.0',
-          type: 'economic'
-        },
-        { 
-          date: '2023-03-24', 
-          time: '09:15', 
-          title: 'LPR报价发布', 
-          description: '预期1年期和5年期LPR保持不变',
-          type: 'policy'
-        },
-        { 
-          date: '2023-03-27', 
-          time: '17:00', 
-          title: '工商银行业绩', 
-          description: '关注资产质量和净息差变化',
-          type: 'business'
-        },
-        { 
-          date: '2023-03-30', 
-          time: '20:30', 
-          title: '美国GDP终值', 
-          description: '预期年化环比增长2.7%',
-          type: 'economic'
+        {
+          date: new Date(2024, 2, 5),
+          time: '09:30',
+          title: '中国PMI数据',
+          description: '预期制造业PMI 50.2，服务业PMI 51.0',
+          country: '中国',
+          importance: 'high'
         }
-      ],
-      selectedDate: null,
-      selectedDay: null
+      ]
     }
   },
   computed: {
     currentYearMonth() {
-      return `${this.currentDate.getFullYear()}年${this.currentDate.getMonth() + 1}月`
+      return `${this.currentDate.getFullYear()}年${this.currentDate.getMonth() + 1}月`;
     },
     calendarDays() {
-      const year = this.currentDate.getFullYear()
-      const month = this.currentDate.getMonth()
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
       
-      // 当月第一天是星期几（0-6，0是周日）
-      const firstDay = new Date(year, month, 1).getDay()
+      const days = [];
       
-      // 当月最后一天是几号
-      const lastDate = new Date(year, month + 1, 0).getDate()
-      
-      // 上个月的最后几天
-      const prevMonthLastDate = new Date(year, month, 0).getDate()
-      const prevMonthDays = []
-      for (let i = 0; i < firstDay; i++) {
-        const day = prevMonthLastDate - firstDay + i + 1
-        const prevMonth = month === 0 ? 11 : month - 1
-        const prevYear = month === 0 ? year - 1 : year
-        const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-        const dayEvents = this.events.filter(event => event.date === dateStr)
-        
-        prevMonthDays.push({
-          day,
-          fullDate: dateStr,
-          isPrevMonth: true,
-          isNextMonth: false,
-          isToday: false,
-          events: dayEvents
-        })
+      // 添加上个月的日期
+      const firstDayWeekDay = firstDay.getDay();
+      for (let i = firstDayWeekDay - 1; i >= 0; i--) {
+        const date = new Date(year, month, -i);
+        days.push({
+          date,
+          dayNumber: date.getDate(),
+          isOtherMonth: true,
+          events: this.getEventsForDate(date)
+        });
       }
       
-      // 当月的天数
-      const currentMonthDays = []
-      const today = new Date()
-      const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month
-      
-      for (let i = 1; i <= lastDate; i++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`
-        const dayEvents = this.events.filter(event => event.date === dateStr)
-        
-        currentMonthDays.push({
-          day: i,
-          fullDate: dateStr,
-          isPrevMonth: false,
-          isNextMonth: false,
-          isToday: isCurrentMonth && today.getDate() === i,
-          events: dayEvents
-        })
+      // 添加当前月的日期
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const date = new Date(year, month, i);
+        days.push({
+          date,
+          dayNumber: i,
+          isOtherMonth: false,
+          events: this.getEventsForDate(date)
+        });
       }
       
-      // 下个月的前几天
-      const nextMonthDays = []
-      const totalDays = prevMonthDays.length + currentMonthDays.length
-      const remainingDays = 42 - totalDays // 6行7列 = 42天
-      
+      // 添加下个月的日期
+      const remainingDays = 42 - days.length; // 6行7列
       for (let i = 1; i <= remainingDays; i++) {
-        const nextMonth = month === 11 ? 0 : month + 1
-        const nextYear = month === 11 ? year + 1 : year
-        const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`
-        const dayEvents = this.events.filter(event => event.date === dateStr)
-        
-        nextMonthDays.push({
-          day: i,
-          fullDate: dateStr,
-          isPrevMonth: false,
-          isNextMonth: true,
-          isToday: false,
-          events: dayEvents
-        })
+        const date = new Date(year, month + 1, i);
+        days.push({
+          date,
+          dayNumber: i,
+          isOtherMonth: true,
+          events: this.getEventsForDate(date)
+        });
       }
       
-      return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays]
+      return days;
     }
   },
   methods: {
-    prevMonth() {
-      const newDate = new Date(this.currentDate)
-      newDate.setMonth(newDate.getMonth() - 1)
-      this.currentDate = newDate
-      this.selectedDate = null
-      this.selectedDay = null
+    navigateMonth(direction) {
+      const newDate = new Date(this.currentDate);
+      newDate.setMonth(newDate.getMonth() + direction);
+      this.currentDate = newDate;
+      this.selectedDay = null;
     },
-    nextMonth() {
-      const newDate = new Date(this.currentDate)
-      newDate.setMonth(newDate.getMonth() + 1)
-      this.currentDate = newDate
-      this.selectedDate = null
-      this.selectedDay = null
+    selectDay(day) {
+      this.selectedDay = day;
     },
-    selectDate(day) {
-      this.selectedDate = day.fullDate
-      this.selectedDay = day
+    getEventsForDate(date) {
+      return this.events.filter(event => 
+        event.date.getDate() === date.getDate() &&
+        event.date.getMonth() === date.getMonth() &&
+        event.date.getFullYear() === date.getFullYear()
+      );
     },
-    closeDetails() {
-      this.selectedDate = null
-      this.selectedDay = null
-    }
-  },
-  mounted() {
-    // 初始化选中今天
-    const today = new Date()
-    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-    this.selectedDate = dateStr
-    
-    // 找到今天对应的日期对象
-    const todayObj = this.calendarDays.find(day => day.isToday)
-    if (todayObj) {
-      this.selectedDay = todayObj
+    isToday(date) {
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
+    },
+    formatSelectedDate(date) {
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
+    },
+    getImportanceClass(importance) {
+      return {
+        'importance-high': importance === 'high',
+        'importance-medium': importance === 'medium',
+        'importance-low': importance === 'low'
+      };
+    },
+    getImportanceText(importance) {
+      switch(importance) {
+        case 'high': return '高重要性';
+        case 'medium': return '中等重要性';
+        case 'low': return '低重要性';
+        default: return '';
+      }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .financial-calendar {
-  position: relative;
-  overflow: hidden;
-  min-height: 500px;
-}
-
-.calendar-header {
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.calendar-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.calendar-nav {
-  background: transparent;
-  border: 1px solid var(--hx-border-level-1-color);
-  color: var(--hx-text-color-secondary);
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
+  flex-direction: column;
   
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .nav-icon {
-    font-size: 12px;
-    line-height: 1;
-  }
-}
-
-.calendar-current {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--hx-text-color-primary);
-}
-
-.calendar-grid {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.weekday-header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  background-color: rgba(255, 255, 255, 0.05);
-  
-  .weekday-cell {
-    padding: 10px;
-    text-align: center;
-    font-weight: 500;
-    font-size: 14px;
-    color: var(--hx-text-color-tertiary);
-  }
-}
-
-.days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(80px, auto);
-  background-color: rgba(255, 255, 255, 0.02);
-  gap: 1px;
-}
-
-.day-cell {
-  position: relative;
-  padding: 8px;
-  background-color: rgba(255, 255, 255, 0.03);
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-  min-height: 85px;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  &.prev-month, &.next-month {
-    opacity: 0.5;
+  .calendar-header {
+    margin-bottom: var(--spacing-md);
     
-    .day-number {
-      color: var(--hx-text-color-quaternary);
-    }
-  }
-  
-  &.today {
-    background-color: rgba(0, 113, 227, 0.15);
-    
-    .day-number {
-      background-color: var(--hx-brand-color-1);
-      color: #fff;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
+    .date-selector {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-weight: 600;
+      margin-top: var(--spacing-md);
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-lg);
+      padding: 6px 10px;
+      
+      .date-nav {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: var(--text-primary);
+        }
+      }
+      
+      .current-date {
+        flex: 1;
+        text-align: center;
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--text-primary);
+      }
     }
   }
   
-  &.selected {
-    border-color: var(--hx-brand-color-1);
-    background-color: rgba(0, 113, 227, 0.1);
+  .calendar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
   }
   
-  &.has-events {
-    .day-number {
-      font-weight: 600;
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: var(--spacing-sm);
+  }
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    
+    .calendar-day {
+      background-color: var(--bg-card);
+      aspect-ratio: 1;
+      padding: var(--spacing-sm);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: var(--bg-card-light);
+      }
+      
+      &.other-month {
+        opacity: 0.5;
+      }
+      
+      &.today {
+        .day-number {
+          color: var(--color-primary);
+          font-weight: 600;
+        }
+      }
+      
+      &.has-events {
+        background-color: rgba(255, 149, 0, 0.05);
+      }
+      
+      .day-number {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+      
+      .day-events {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 11px;
+        
+        .event-dot {
+          padding: 2px 4px;
+          border-radius: 2px;
+          color: var(--text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          
+          &.importance-high {
+            background-color: rgba(239, 68, 68, 0.2);
+          }
+          
+          &.importance-medium {
+            background-color: rgba(251, 191, 36, 0.2);
+          }
+          
+          &.importance-low {
+            background-color: rgba(74, 222, 128, 0.2);
+          }
+        }
+        
+        .more-events {
+          font-size: 10px;
+          color: var(--text-tertiary);
+          text-align: center;
+        }
+      }
+    }
+  }
+  
+  .events-detail {
+    background-color: var(--bg-card-light);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    
+    .detail-header {
+      margin-bottom: var(--spacing-md);
+      
+      h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+      }
+    }
+    
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      
+      .event-item {
+        display: flex;
+        gap: var(--spacing-md);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        
+        &.importance-high {
+          background-color: rgba(239, 68, 68, 0.1);
+        }
+        
+        &.importance-medium {
+          background-color: rgba(251, 191, 36, 0.1);
+        }
+        
+        &.importance-low {
+          background-color: rgba(74, 222, 128, 0.1);
+        }
+        
+        .event-time {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--text-primary);
+          min-width: 56px;
+        }
+        
+        .event-info {
+          flex: 1;
+          
+          .event-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+          }
+          
+          .event-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+          }
+          
+          .event-meta {
+            display: flex;
+            gap: 8px;
+            
+            span {
+              font-size: 12px;
+              padding: 2px 8px;
+              border-radius: 12px;
+              background-color: rgba(255, 255, 255, 0.05);
+              color: var(--text-tertiary);
+            }
+          }
+        }
+      }
     }
   }
 }
 
-.day-number {
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: var(--hx-text-color-secondary);
-}
-
-.day-events {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-}
-
-.event-tag {
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-  
-  &.economic {
-    background-color: rgba(83, 177, 117, 0.2);
-    color: #53b175;
+@media (max-width: 768px) {
+  .financial-calendar {
+    .calendar-grid {
+      .calendar-day {
+        padding: 4px;
+        
+        .day-number {
+          font-size: 12px;
+        }
+        
+        .day-events {
+          font-size: 10px;
+        }
+      }
+    }
+    
+    .events-detail {
+      padding: var(--spacing-sm);
+      
+      .event-item {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        
+        .event-time {
+          font-size: 12px;
+        }
+        
+        .event-info {
+          .event-title {
+            font-size: 13px;
+          }
+          
+          .event-description {
+            font-size: 12px;
+          }
+        }
+      }
+    }
   }
-  
-  &.policy {
-    background-color: rgba(0, 113, 227, 0.2);
-    color: #0071e3;
-  }
-  
-  &.business {
-    background-color: rgba(255, 159, 10, 0.2);
-    color: #ff9f0a;
-  }
-}
-
-.more-events {
-  font-size: 11px;
-  color: var(--hx-text-color-tertiary);
-  text-align: center;
-}
-
-.selected-day-details {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: var(--hx-bg-color-container);
-  border-top: 1px solid var(--hx-border-level-1-color);
-  padding: 16px;
-  z-index: 10;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-  animation: slideUp 0.3s forwards;
-}
-
-.selected-day-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  font-weight: 600;
-  color: var(--hx-text-color-primary);
-}
-
-.close-btn {
-  background: transparent;
-  border: none;
-  color: var(--hx-text-color-tertiary);
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.selected-day-events {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.event-detail {
-  display: flex;
-  gap: 12px;
-  padding: 8px;
-  border-radius: 8px;
-  
-  &.economic {
-    background-color: rgba(83, 177, 117, 0.1);
-  }
-  
-  &.policy {
-    background-color: rgba(0, 113, 227, 0.1);
-  }
-  
-  &.business {
-    background-color: rgba(255, 159, 10, 0.1);
-  }
-}
-
-.event-time {
-  font-weight: 500;
-  color: var(--hx-text-color-secondary);
-  white-space: nowrap;
-}
-
-.event-content {
-  flex: 1;
-  
-  .event-title {
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: var(--hx-text-color-primary);
-  }
-  
-  .event-description {
-    font-size: 12px;
-    color: var(--hx-text-color-tertiary);
-  }
-}
-
-.no-events {
-  text-align: center;
-  padding: 12px;
-  color: var(--hx-text-color-tertiary);
-}
-
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
 }
 </style> 

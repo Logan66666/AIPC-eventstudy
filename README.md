@@ -516,6 +516,7 @@ export default {
 ## 样式系统使用流程
 
 ### 样式系统架构图
+
 ```mermaid
 graph TD
     A[基础层 Base Layer] --> B[映射层 Mapping Layer]
@@ -536,7 +537,7 @@ graph TD
     
     subgraph 应用层
     C1 --> D1[class='text-brand bg-brand-light p-2']
-    C2 --> D2[.custom-class { color: var(--hx-brand-color-3); }]
+    C2 --> D2["custom-class: color: var(--hx-brand-color-3)"]
     end
 ```
 
@@ -766,7 +767,7 @@ function getCSSVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 ```
-```
+
 
 
 ## 小白友好使用指南

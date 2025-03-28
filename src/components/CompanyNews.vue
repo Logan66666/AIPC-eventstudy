@@ -1,30 +1,39 @@
 <template>
-  <div class="card company-card">
-    <h2 class="card-title">公司动向</h2>
-    <p class="card-subtitle">自选股动态</p>
-    
-    <div class="company-filter">
-      <button 
-        v-for="(filter, index) in filters" 
-        :key="index" 
-        :class="['company-filter-btn', { active: currentFilter === filter.id }]"
-        @click="currentFilter = filter.id"
-      >
-        {{ filter.name }}
-      </button>
+  <div class="company-news card">
+    <div class="company-header">
+      <h2 class="card-title secondary-title">公司动向</h2>
+      <div class="card-subtitle">自选股动态</div>
     </div>
     
-    <div class="company-list">
-      <div v-for="(news, index) in filteredCompanyNews" :key="index" class="company-item">
-        <div class="company-info">
-          <span class="company-name">{{ news.companyName }}</span>
-          <span class="company-code">{{ news.companyCode }}</span>
+    <div class="company-content">
+      <div class="company-tabs">
+        <div 
+          v-for="(filter, index) in filters" 
+          :key="index" 
+          class="company-tab"
+          :class="{'active': currentFilter === filter.id}"
+          @click="currentFilter = filter.id"
+        >
+          {{ filter.name }}
         </div>
-        <div class="company-news">
-          <span :class="['company-news-tag', news.tagType]">{{ news.tagText }}</span>
-          <p>{{ news.content }}</p>
+      </div>
+      
+      <div class="company-list">
+        <div v-for="(news, index) in filteredCompanyNews" :key="index" class="company-item">
+          <div class="company-header-row">
+            <div class="company-info">
+              <div class="company-name">{{ news.companyName }}</div>
+              <div class="company-code">{{ news.companyCode }}</div>
+            </div>
+            <div class="company-news-tag" :class="news.tagType">{{ news.tagText }}</div>
+          </div>
+          <div class="company-content-row">
+            <p>{{ news.content }}</p>
+          </div>
+          <div class="company-footer-row">
+            <div class="company-date">{{ news.date }}</div>
+          </div>
         </div>
-        <span class="company-date">{{ news.date }}</span>
       </div>
     </div>
   </div>
@@ -103,118 +112,198 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.company-card {
-  background-color: var(--hx-bg-color-container) !important;
+.company-news {
   height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.company-filter {
-  display: flex;
-  margin-bottom: var(--hx-size-4);
-  overflow-x: auto;
   
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-}
-
-.company-filter-btn {
-  background: transparent;
-  border: 1px solid var(--hx-border-level-1-color);
-  padding: var(--hx-size-1) var(--hx-size-3);
-  margin-right: var(--hx-size-2);
-  border-radius: var(--hx-radius-default);
-  color: var(--hx-text-color-secondary);
-  white-space: nowrap;
-  
-  &:hover {
-    border-color: var(--hx-brand-color-hover);
-    color: var(--hx-brand-color-hover);
+  .company-header {
+    margin-bottom: var(--spacing-md);
   }
   
-  &.active {
-    background-color: var(--hx-brand-color-3);
-    color: var(--hx-gray-color-1);
-    border-color: var(--hx-brand-color-3);
-  }
-}
-
-.company-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hx-size-3);
-}
-
-.company-item {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-radius: var(--hx-radius-default);
-  padding: var(--hx-size-3);
-  border: 1px solid var(--hx-border-level-1-color);
-}
-
-.company-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--hx-size-2);
-}
-
-.company-name {
-  font-weight: 500;
-  color: var(--hx-text-color-primary);
-}
-
-.company-code {
-  color: var(--hx-text-color-tertiary);
-  font-size: var(--hx-font-size-body-small);
-}
-
-.company-news {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--hx-size-2);
-  margin-bottom: var(--hx-size-2);
-  
-  p {
-    margin: 0;
+  .company-content {
     flex: 1;
-    font-size: var(--hx-font-size-body-small);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .company-tabs {
+    display: flex;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    .company-tab {
+      padding: 8px 12px;
+      margin-right: var(--spacing-md);
+      font-size: 14px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      
+      &:hover {
+        color: var(--text-secondary);
+      }
+      
+      &.active {
+        color: var(--color-secondary);
+        font-weight: 600;
+        
+        &:after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: var(--color-secondary);
+        }
+      }
+    }
+  }
+  
+  .company-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+  }
+  
+  .company-item {
+    background-color: rgba(36, 107, 248, 0.05);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    transition: all 0.25s ease;
+    
+    &:hover {
+      background-color: rgba(36, 107, 248, 0.08);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .company-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-sm);
+      
+      .company-info {
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: baseline;
+        
+        .company-name {
+          font-weight: 600;
+          font-size: 15px;
+          color: var(--text-primary);
+        }
+        
+        .company-code {
+          color: var(--text-tertiary);
+          font-size: 12px;
+        }
+      }
+      
+      .company-news-tag {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        
+        &.announcement {
+          background-color: rgba(var(--secondary-rgb), 0.1);
+          color: var(--color-secondary);
+        }
+        
+        &.research {
+          background-color: rgba(var(--tertiary-rgb), 0.1);
+          color: var(--color-tertiary);
+        }
+        
+        &.news {
+          background-color: rgba(var(--success-rgb), 0.1);
+          color: var(--color-success);
+        }
+        
+        &.performance {
+          background-color: rgba(var(--primary-rgb), 0.1);
+          color: var(--color-primary);
+        }
+      }
+    }
+    
+    .company-content-row {
+      p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+    }
+    
+    .company-footer-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--spacing-sm);
+      
+      .company-date {
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+    }
   }
 }
 
-.company-news-tag {
-  display: inline-block;
-  padding: var(--hx-size-1) var(--hx-size-2);
-  border-radius: var(--hx-radius-small);
-  font-size: var(--hx-font-size-body-small);
-  flex-shrink: 0;
-  
-  &.announcement {
-    background-color: var(--hx-brand-color-1);
-    color: var(--hx-brand-color-5);
+@media (max-width: 768px) {
+  .company-news {
+    .company-tabs {
+      .company-tab {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+    }
+    
+    .company-item {
+      padding: var(--spacing-sm);
+      
+      .company-header-row {
+        .company-info {
+          .company-name {
+            font-size: 14px;
+          }
+        }
+      }
+      
+      .company-content-row {
+        p {
+          font-size: 12px;
+        }
+      }
+    }
   }
-  
-  &.research {
-    background-color: var(--hx-warning-color-1);
-    color: var(--hx-warning-color-5);
-  }
-  
-  &.news {
-    background-color: var(--hx-success-color-1);
-    color: var(--hx-success-color-5);
-  }
-  
-  &.performance {
-    background-color: var(--hx-raise-color-1);
-    color: var(--hx-raise-color-5);
-  }
-}
-
-.company-date {
-  display: block;
-  text-align: right;
-  font-size: var(--hx-font-size-body-small);
-  color: var(--hx-text-color-tertiary);
 }
 </style> 

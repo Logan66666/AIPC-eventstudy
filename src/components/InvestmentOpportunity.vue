@@ -1,17 +1,35 @@
 <template>
-  <div class="card opportunity-card">
-    <h2 class="card-title">埋伏机会</h2>
-    <p class="card-subtitle">左侧投资机会前瞻</p>
+  <div class="investment-opportunities card">
+    <div class="opportunity-header">
+      <h2 class="card-title tertiary-title">埋伏机会</h2>
+      <div class="card-subtitle">左侧投资机会前瞻</div>
+    </div>
     
-    <div class="opportunity-list">
-      <div v-for="(opportunity, index) in opportunities" :key="index" class="opportunity-item">
-        <div class="opportunity-header">
-          <h3>{{ opportunity.title }}</h3>
-          <span class="opportunity-timing">时间窗口：{{ opportunity.timeWindow }}</span>
-        </div>
-        <p>{{ opportunity.description }}</p>
-        <div class="opportunity-stocks">
-          <span v-for="(stock, stockIndex) in opportunity.stocks" :key="stockIndex" class="stock-tag">{{ stock }}</span>
+    <div class="opportunity-content">
+      <div class="opportunity-list">
+        <div v-for="(opportunity, index) in opportunities" :key="index" class="opportunity-item">
+          <div class="opportunity-header-row">
+            <h3 class="opportunity-title">{{ opportunity.title }}</h3>
+            <div class="opportunity-timing">
+              <span class="timing-icon">⏳</span>
+              <span class="timing-text">{{ opportunity.timeWindow }}</span>
+            </div>
+          </div>
+          
+          <p class="opportunity-description">{{ opportunity.description }}</p>
+          
+          <div class="opportunity-stocks">
+            <span class="stocks-label">相关标的</span>
+            <div class="stocks-list">
+              <span 
+                v-for="(stock, stockIndex) in opportunity.stocks" 
+                :key="stockIndex" 
+                class="stock-tag"
+              >
+                {{ stock }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -43,55 +61,151 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.opportunity-card {
-  background-color: var(--hx-bg-color-container) !important;
+.investment-opportunities {
   height: 100%;
-}
-
-.opportunity-list {
   display: flex;
   flex-direction: column;
-  gap: var(--hx-size-4);
-}
-
-.opportunity-item {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-radius: var(--hx-radius-default);
-  padding: var(--hx-size-3);
-  border: 1px solid var(--hx-border-level-1-color);
-}
-
-.opportunity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--hx-size-2);
   
-  h3 {
-    font-size: var(--hx-font-size-title-small);
-    color: var(--hx-text-color-primary);
-    margin: 0;
+  .opportunity-header {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .opportunity-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+  }
+  
+  .opportunity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .opportunity-item {
+    background-color: rgba(255, 149, 0, 0.05);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    transition: all 0.25s ease;
+    
+    &:hover {
+      background-color: rgba(255, 149, 0, 0.08);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .opportunity-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-sm);
+      
+      .opportunity-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.4;
+      }
+      
+      .opportunity-timing {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--color-tertiary);
+        background-color: rgba(255, 149, 0, 0.1);
+        padding: 2px 8px;
+        border-radius: 12px;
+        
+        .timing-icon {
+          font-size: 11px;
+        }
+        
+        .timing-text {
+          white-space: nowrap;
+        }
+      }
+    }
+    
+    .opportunity-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0 0 var(--spacing-md) 0;
+      line-height: 1.5;
+    }
+    
+    .opportunity-stocks {
+      display: flex;
+      align-items: baseline;
+      
+      .stocks-label {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        margin-right: var(--spacing-sm);
+        white-space: nowrap;
+      }
+      
+      .stocks-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        
+        .stock-tag {
+          display: inline-block;
+          padding: 2px 8px;
+          background-color: rgba(255, 149, 0, 0.1);
+          color: var(--color-tertiary);
+          border-radius: 12px;
+          font-size: 12px;
+        }
+      }
+    }
   }
 }
 
-.opportunity-timing {
-  font-size: var(--hx-font-size-body-small);
-  color: var(--hx-text-color-tertiary);
-}
-
-.opportunity-stocks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--hx-size-2);
-  margin-top: var(--hx-size-3);
-}
-
-.stock-tag {
-  display: inline-block;
-  padding: var(--hx-size-1) var(--hx-size-2);
-  background-color: var(--hx-brand-color-1);
-  color: var(--hx-brand-color-5);
-  border-radius: var(--hx-radius-small);
-  font-size: var(--hx-font-size-body-small);
+@media (max-width: 768px) {
+  .investment-opportunities {
+    .opportunity-item {
+      padding: var(--spacing-sm);
+      
+      .opportunity-header-row {
+        .opportunity-title {
+          font-size: 14px;
+        }
+        
+        .opportunity-timing {
+          font-size: 11px;
+        }
+      }
+      
+      .opportunity-description {
+        font-size: 12px;
+      }
+      
+      .opportunity-stocks {
+        flex-direction: column;
+        
+        .stocks-label {
+          margin-bottom: 4px;
+        }
+        
+        .stocks-list {
+          .stock-tag {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+  }
 }
 </style> 

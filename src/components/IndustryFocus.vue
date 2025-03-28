@@ -1,25 +1,28 @@
 <template>
-  <div class="card industry-card">
-    <h2 class="card-title">行业焦点</h2>
-    <p class="card-subtitle">行业重要事件解读</p>
-    
-    <div class="industry-tabs">
-      <button 
-        v-for="(industry, index) in industries" 
-        :key="index" 
-        :class="['industry-tab', { active: currentIndustry === industry.id }]"
-        @click="currentIndustry = industry.id"
-      >
-        {{ industry.name }}
-      </button>
+  <div class="industry-focus card">
+    <div class="industry-header">
+      <h2 class="card-title secondary-title">行业焦点</h2>
+      <div class="card-subtitle">行业重要事件解读</div>
     </div>
     
     <div class="industry-content">
-      <div class="industry-news">
+      <div class="industry-tabs">
+        <div 
+          v-for="(industry, index) in industries" 
+          :key="index" 
+          class="industry-tab"
+          :class="{'active': currentIndustry === industry.id}"
+          @click="currentIndustry = industry.id"
+        >
+          {{ industry.name }}
+        </div>
+      </div>
+      
+      <div class="industry-news-grid">
         <div v-for="(news, index) in currentIndustryNews" :key="index" class="industry-news-item">
-          <h3>{{ news.title }}</h3>
-          <p>{{ news.content }}</p>
-          <span class="industry-news-date">{{ news.date }}</span>
+          <h3 class="news-title">{{ news.title }}</h3>
+          <p class="news-content">{{ news.content }}</p>
+          <div class="news-date">{{ news.date }}</div>
         </div>
       </div>
     </div>
@@ -117,81 +120,155 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.industry-card {
-  background-color: var(--hx-bg-color-container) !important;
+.industry-focus {
   height: 100%;
-}
-
-.industry-tabs {
   display: flex;
-  overflow-x: auto;
-  margin-bottom: var(--hx-size-4);
+  flex-direction: column;
   
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-}
-
-.industry-tab {
-  background: transparent;
-  border: 1px solid var(--hx-border-level-1-color);
-  padding: var(--hx-size-2) var(--hx-size-4);
-  margin-right: var(--hx-size-2);
-  border-radius: var(--hx-radius-default);
-  color: var(--hx-text-color-secondary);
-  white-space: nowrap;
-  
-  &:hover {
-    border-color: var(--hx-brand-color-hover);
-    color: var(--hx-brand-color-hover);
+  .industry-header {
+    margin-bottom: var(--spacing-md);
   }
   
-  &.active {
-    background-color: var(--hx-brand-color-3);
-    color: var(--hx-gray-color-1);
-    border-color: var(--hx-brand-color-3);
-  }
-}
-
-.industry-news {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--hx-size-4);
-}
-
-.industry-news-item {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-radius: var(--hx-radius-default);
-  padding: var(--hx-size-3);
-  border: 1px solid var(--hx-border-level-1-color);
-  
-  h3 {
-    font-size: var(--hx-font-size-title-small);
-    color: var(--hx-text-color-primary);
-    margin-bottom: var(--hx-size-2);
+  .industry-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
-  p {
-    font-size: var(--hx-font-size-body-medium);
-    color: var(--hx-text-color-secondary);
-    margin-bottom: var(--hx-size-2);
+  .industry-tabs {
+    display: flex;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    .industry-tab {
+      padding: 8px 12px;
+      margin-right: var(--spacing-md);
+      font-size: 14px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      
+      &:hover {
+        color: var(--text-secondary);
+      }
+      
+      &.active {
+        color: var(--color-secondary);
+        font-weight: 600;
+        
+        &:after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: var(--color-secondary);
+        }
+      }
+    }
   }
-}
-
-.industry-news-date {
-  font-size: var(--hx-font-size-body-small);
-  color: var(--hx-text-color-tertiary);
+  
+  .industry-news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+  }
+  
+  .industry-news-item {
+    background-color: rgba(36, 107, 248, 0.05);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    
+    &:hover {
+      background-color: rgba(36, 107, 248, 0.08);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .news-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-sm) 0;
+      line-height: 1.4;
+    }
+    
+    .news-content {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0 0 var(--spacing-md) 0;
+      line-height: 1.5;
+      flex: 1;
+    }
+    
+    .news-date {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      align-self: flex-end;
+    }
+  }
 }
 
 @media (max-width: 1024px) {
-  .industry-news {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  .industry-focus {
+    .industry-news-grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
   }
 }
 
 @media (max-width: 768px) {
-  .industry-news {
-    grid-template-columns: 1fr;
+  .industry-focus {
+    .industry-tabs {
+      .industry-tab {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+    }
+    
+    .industry-news-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .industry-news-item {
+      padding: var(--spacing-sm);
+      
+      .news-title {
+        font-size: 14px;
+      }
+      
+      .news-content {
+        font-size: 12px;
+      }
+    }
   }
 }
 </style> 

@@ -6,8 +6,7 @@
         <div class="logo-container">
           <div class="logo-icon">A</div>
           <div class="title-container">
-            <h1>大A头条</h1>
-            <p>实时掌握市场动态，发现投资机会</p>
+            <h1>股市头条</h1>
           </div>
         </div>
         
@@ -20,44 +19,37 @@
 
     <!-- 内容区域 -->
     <div class="content-container">
-      <!-- 第一行布局：股市头条（横向排列） -->
+      <!-- 股市头条部分 -->
       <div class="grid-row">
-        <!-- 股市头条模块 -->
         <StockHeadlines />
       </div>
-
-      <!-- 第二行布局：世界经济 + 政策催化 -->
-      <div class="grid-row">
-        <!-- 世界经济模块 -->
+      
+      <!-- 世界经济和政策催化部分 -->
+      <div class="grid-row two-columns">
         <WorldEconomy />
-
-        <!-- 政策催化模块 -->
-        <PolicyCatalyst />
+        <PolicyCatalysts />
       </div>
-
-      <!-- 第三行布局：埋伏机会 + 行业焦点 -->
-      <div class="grid-row">
-        <!-- 埋伏机会模块 -->
+      
+      <!-- 埋伏机会和行业焦点部分 -->
+      <div class="grid-row two-columns">
         <InvestmentOpportunity />
-        
-        <!-- 行业焦点模块 -->
         <IndustryFocus />
       </div>
-
-      <!-- 第四行布局：财经日历 + 公司动向 -->
+      
+      <!-- 其他组件部分 -->
       <div class="grid-row">
-        <!-- 财经日历模块 -->
-        <FinancialCalendar />
-
-        <!-- 公司动向模块 -->
+        <CustomChart />
+      </div>
+      
+      <div class="grid-row">
         <CompanyNews />
+      </div>
+      
+      <div class="grid-row">
+        <FinancialCalendar />
       </div>
     </div>
 
-    <!-- 底部区域 -->
-    <footer class="main-footer">
-      <p>大A头条 © 2023 | 数据来源：Wind、同花顺iFinD、东方财富</p>
-    </footer>
   </div>
 </template>
 
@@ -65,11 +57,12 @@
 import ThemeSwitcher from './components/ui/ThemeSwitcher.vue'
 import StockHeadlines from './components/StockHeadlines.vue'
 import WorldEconomy from './components/WorldEconomy.vue'
-import PolicyCatalyst from './components/PolicyCatalyst.vue'
+import PolicyCatalysts from './components/PolicyCatalysts.vue'
 import InvestmentOpportunity from './components/InvestmentOpportunity.vue'
 import IndustryFocus from './components/IndustryFocus.vue'
-import FinancialCalendar from './components/FinancialCalendar.vue'
+import CustomChart from './components/CustomChart.vue'
 import CompanyNews from './components/CompanyNews.vue'
+import FinancialCalendar from './components/FinancialCalendar.vue'
 
 export default {
   name: 'App',
@@ -77,11 +70,12 @@ export default {
     ThemeSwitcher,
     StockHeadlines,
     WorldEconomy,
-    PolicyCatalyst,
+    PolicyCatalysts,
     InvestmentOpportunity,
     IndustryFocus,
-    FinancialCalendar,
-    CompanyNews
+    CustomChart,
+    CompanyNews,
+    FinancialCalendar
   },
   data() {
     return {
@@ -106,39 +100,122 @@ export default {
 </script>
 
 <style lang="scss">
+:root {
+  // 颜色系统
+  --color-primary: #ff3b57;
+  --color-secondary: #246bf8;
+  --color-tertiary: #ff9500;
+  --color-success: #00e676;
+  --color-danger: #ff3b57;
+  --color-warning: #ffbb00;
+  --color-info: #0dcaf0;
+  
+  // RGB变量（用于透明度调整）
+  --primary-rgb: 255, 59, 87;
+  --secondary-rgb: 36, 107, 248;
+  --tertiary-rgb: 255, 149, 0;
+  --success-rgb: 0, 230, 118;
+  --danger-rgb: 255, 59, 87;
+  --warning-rgb: 255, 187, 0;
+  --info-rgb: 13, 202, 240;
+  
+  // 背景色系统
+  --bg-page: #0f1117;
+  --bg-card: #1a202e;
+  --bg-card-light: #242a38;
+  --bg-highlight: rgba(255, 255, 255, 0.05);
+  
+  // 文字颜色
+  --text-primary: #ffffff;
+  --text-secondary: #a9b2c3;
+  --text-tertiary: #6b7897;
+  
+  // 边框色
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  
+  // 尺寸变量
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  // 投影
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
+  
+  // 圆角
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  // 过渡时间
+  --transition-fast: 0.2s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.5s;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  color: var(--hx-text-color-primary);
-  background-color: var(--hx-bg-color-page);
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  .content-container {
+    padding: var(--spacing-lg);
+    display: grid;
+    gap: var(--spacing-lg);
+    
+    .grid-row {
+      display: grid;
+      gap: var(--spacing-lg);
+      
+      &.two-columns {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      // 添加响应式布局
+      @media (max-width: 1024px) {
+        &.two-columns {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+  }
 }
 
 .main-header {
-  background-color: var(--hx-bg-color-specialcomponent);
-  color: var(--hx-text-color-primary);
-  padding: var(--hx-size-5) var(--hx-size-6);
-  border-bottom: 1px solid var(--hx-border-level-1-color);
+  background-color: var(--bg-card);
+  padding: var(--spacing-md) var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
   
   .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
   }
   
   .logo-container {
     display: flex;
     align-items: center;
-    gap: var(--hx-size-3);
+    gap: var(--spacing-sm);
   }
   
   .logo-icon {
     width: 36px;
     height: 36px;
-    border-radius: 8px;
-    background-color: var(--hx-brand-color-1);
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
     color: white;
     display: flex;
     align-items: center;
@@ -149,14 +226,14 @@ export default {
   
   .title-container {
     h1 {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     
     p {
-      font-size: 14px;
-      color: var(--hx-text-color-tertiary);
+      font-size: 12px;
+      color: var(--text-secondary);
       margin: 0;
     }
   }
@@ -164,54 +241,129 @@ export default {
 
 .content-container {
   flex: 1;
-  padding: var(--hx-size-6) var(--hx-size-4);
-  max-width: 1200px;
+  padding: var(--spacing-lg) var(--spacing-md);
+  max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
 }
 
 .grid-row {
-  display: flex;
-  margin-bottom: var(--hx-size-5);
-  gap: var(--hx-size-5);
+  display: grid;
+  gap: var(--spacing-md);
   
-  @media (max-width: 768px) {
-    flex-direction: column;
+  &.main-row {
+    grid-template-columns: 1fr;
+  }
+  
+  &.split-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 .card {
-  background-color: var(--hx-bg-color-container);
-  border-radius: 8px;
-  padding: var(--hx-size-5);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  flex: 1;
-}
-
-.full-width {
-  width: 100%;
+  background-color: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-md);
+  
+  &.full-width {
+    width: 100%;
+  }
+  
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    
+    &:before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 18px;
+      margin-right: var(--spacing-sm);
+      border-radius: 2px;
+    }
+    
+    &.primary-title:before {
+      background: var(--color-primary);
+    }
+    
+    &.secondary-title:before {
+      background: var(--color-secondary);
+    }
+    
+    &.tertiary-title:before {
+      background: var(--color-tertiary);
+    }
+  }
+  
+  .card-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    padding-left: calc(3px + var(--spacing-sm));
+  }
 }
 
 .main-footer {
-  background-color: var(--hx-bg-color-specialcomponent);
-  color: var(--hx-text-color-tertiary);
-  padding: var(--hx-size-4);
+  background-color: var(--bg-card);
+  color: var(--text-tertiary);
+  padding: var(--spacing-md);
   text-align: center;
-  font-size: 13px;
-  border-top: 1px solid var(--hx-border-level-1-color);
+  font-size: 12px;
+  border-top: 1px solid var(--border-subtle);
   
   p {
     margin: 0;
   }
 }
 
-@media (max-width: 768px) {
+// 响应式调整
+@media (max-width: 1200px) {
+  .content-container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 992px) {
   .grid-row {
-    flex-direction: column;
+    &.split-row {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+    }
+    
+    .title-container {
+      h1 {
+        font-size: 18px;
+      }
+    }
+  }
+  
+  .content-container {
+    padding: var(--spacing-md) var(--spacing-sm);
   }
   
   .card {
-    margin-bottom: var(--hx-size-4);
+    padding: var(--spacing-sm);
   }
 }
 </style>
