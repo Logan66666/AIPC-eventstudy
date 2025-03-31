@@ -4,9 +4,8 @@
     <header class="main-header">
       <div class="header-content">
         <div class="logo-container">
-          <div class="logo-icon">A</div>
           <div class="title-container">
-            <h1>股市头条</h1>
+            <h1>A股事件</h1>
           </div>
         </div>
         
@@ -19,6 +18,11 @@
 
     <!-- 内容区域 -->
     <div class="content-container">
+      <!-- 调试组件 -->
+      <div class="grid-row" v-if="showDebug">
+        <DebugStyleVars />
+      </div>
+      
       <!-- 股市头条部分 -->
       <div class="grid-row">
         <StockHeadlines />
@@ -36,20 +40,16 @@
         <IndustryFocus />
       </div>
       
-      <!-- 其他组件部分 -->
-      <div class="grid-row">
-        <CustomChart />
-      </div>
-      
+      <!-- 公司新闻部分 -->
       <div class="grid-row">
         <CompanyNews />
       </div>
       
+      <!-- 财经日历部分 -->
       <div class="grid-row">
         <FinancialCalendar />
       </div>
     </div>
-
   </div>
 </template>
 
@@ -60,9 +60,9 @@ import WorldEconomy from './components/WorldEconomy.vue'
 import PolicyCatalysts from './components/PolicyCatalysts.vue'
 import InvestmentOpportunity from './components/InvestmentOpportunity.vue'
 import IndustryFocus from './components/IndustryFocus.vue'
-import CustomChart from './components/CustomChart.vue'
 import CompanyNews from './components/CompanyNews.vue'
 import FinancialCalendar from './components/FinancialCalendar.vue'
+import DebugStyleVars from './components/ui/DebugStyleVars.vue'
 
 export default {
   name: 'App',
@@ -73,13 +73,14 @@ export default {
     PolicyCatalysts,
     InvestmentOpportunity,
     IndustryFocus,
-    CustomChart,
     CompanyNews,
-    FinancialCalendar
+    FinancialCalendar,
+    DebugStyleVars
   },
   data() {
     return {
-      currentTheme: 'default'
+      currentTheme: 'default',
+      showDebug: false // 设置为true可以显示调试组件
     }
   },
   methods: {
@@ -95,84 +96,39 @@ export default {
       // 更新当前主题
       this.currentTheme = theme;
     }
+  },
+  mounted() {
+    // 检查URL参数是否启用调试模式
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('debug') === 'true') {
+      this.showDebug = true;
+    }
+    
+    // 按D键切换调试模式
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'd' && e.ctrlKey) {
+        this.showDebug = !this.showDebug;
+      }
+    });
   }
 }
 </script>
 
 <style lang="scss">
-:root {
-  // 颜色系统
-  --color-primary: #ff3b57;
-  --color-secondary: #246bf8;
-  --color-tertiary: #ff9500;
-  --color-success: #00e676;
-  --color-danger: #ff3b57;
-  --color-warning: #ffbb00;
-  --color-info: #0dcaf0;
-  
-  // RGB变量（用于透明度调整）
-  --primary-rgb: 255, 59, 87;
-  --secondary-rgb: 36, 107, 248;
-  --tertiary-rgb: 255, 149, 0;
-  --success-rgb: 0, 230, 118;
-  --danger-rgb: 255, 59, 87;
-  --warning-rgb: 255, 187, 0;
-  --info-rgb: 13, 202, 240;
-  
-  // 背景色系统
-  --bg-page: #0f1117;
-  --bg-card: #1a202e;
-  --bg-card-light: #242a38;
-  --bg-highlight: rgba(255, 255, 255, 0.05);
-  
-  // 文字颜色
-  --text-primary: #ffffff;
-  --text-secondary: #a9b2c3;
-  --text-tertiary: #6b7897;
-  
-  // 边框色
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.15);
-  
-  // 尺寸变量
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  
-  // 投影
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
-  
-  // 圆角
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  
-  // 过渡时间
-  --transition-fast: 0.2s;
-  --transition-normal: 0.3s;
-  --transition-slow: 0.5s;
-}
-
 .app-container {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  color: var(--text-primary);
-  background-color: var(--bg-page);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--hx-bg-color-page);
+  color: var(--hx-text-color-primary);
+  font: var(--hx-font-body-medium);
   
   .content-container {
-    padding: var(--spacing-lg);
+    padding: var(--hx-size-6);
     display: grid;
-    gap: var(--spacing-lg);
+    gap: var(--hx-size-6);
     
     .grid-row {
       display: grid;
-      gap: var(--spacing-lg);
+      gap: var(--hx-size-6);
       
       &.two-columns {
         grid-template-columns: repeat(2, 1fr);
@@ -189,9 +145,9 @@ export default {
 }
 
 .main-header {
-  background-color: var(--bg-card);
-  padding: var(--spacing-md) var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--hx-bg-color-container);
+  padding: var(--hx-comp-paddingTB-m) var(--hx-comp-paddingLR-l);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -208,32 +164,25 @@ export default {
   .logo-container {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--hx-size-2);
   }
   
   .logo-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-sm);
-    background: var(--color-primary);
+    width: var(--hx-comp-size-m);
+    height: var(--hx-comp-size-m);
+    border-radius: var(--hx-radius-small);
+    background: var(--hx-brand-color-3);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 20px;
+    font: var(--hx-font-mark-medium);
   }
   
   .title-container {
     h1 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    
-    p {
-      font-size: 12px;
-      color: var(--text-secondary);
+      font: var(--hx-font-headline-medium);
+      color: var(--hx-text-color-primary);
       margin: 0;
     }
   }
@@ -241,18 +190,18 @@ export default {
 
 .content-container {
   flex: 1;
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding: var(--hx-size-6) var(--hx-comp-paddingLR-s);
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-lg);
+  gap: var(--hx-comp-margin-m);
 }
 
 .grid-row {
   display: grid;
-  gap: var(--spacing-md);
+  gap: var(--hx-comp-margin-m);
   
   &.main-row {
     grid-template-columns: 1fr;
@@ -264,62 +213,61 @@ export default {
 }
 
 .card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  padding: var(--spacing-md);
-  
-  &.full-width {
-    width: 100%;
-  }
-  
+  background-color: var(--hx-bg-color-container);
+  border-radius: var(--hx-radius-medium);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .card-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
+    font: var(--hx-font-title-medium);
+    margin: 0 0 var(--hx-size-2) 0;
+    position: relative;
+    padding-left: var(--hx-comp-paddingLR-s);
     display: flex;
     align-items: center;
-    
+
     &:before {
       content: "";
-      display: inline-block;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
       width: 3px;
-      height: 18px;
-      margin-right: var(--spacing-sm);
+      height: 70%;
       border-radius: 2px;
     }
-    
+
     &.primary-title:before {
-      background: var(--color-primary);
+      background-color: var(--hx-brand-color-3);
     }
-    
+
     &.secondary-title:before {
-      background: var(--color-secondary);
+      background-color: var(--hx-sec-brand-color-3);
     }
-    
+
     &.tertiary-title:before {
-      background: var(--color-tertiary);
+      background-color: var(--hx-warning-color-3);
     }
   }
-  
+
   .card-subtitle {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-top: 0;
-    margin-bottom: var(--spacing-md);
-    padding-left: calc(3px + var(--spacing-sm));
+    margin: 0 0 var(--hx-comp-margin-m) 0;
+    padding-left: var(--hx-comp-paddingLR-s);
+    color: var(--hx-text-color-tertiary);
+    font: var(--hx-font-body-small);
   }
 }
 
 .main-footer {
-  background-color: var(--bg-card);
-  color: var(--text-tertiary);
-  padding: var(--spacing-md);
+  background-color: var(--hx-bg-color-container);
+  color: var(--hx-text-color-secondary);
+  padding: var(--hx-comp-paddingTB-s) var(--hx-comp-paddingLR-s);
   text-align: center;
-  font-size: 12px;
-  border-top: 1px solid var(--border-subtle);
+  font: var(--hx-font-link-small);
+  border-top: 1px solid var(--hx-border-level-1-color);
   
   p {
     margin: 0;
@@ -329,7 +277,7 @@ export default {
 // 响应式调整
 @media (max-width: 1200px) {
   .content-container {
-    padding: var(--spacing-md);
+    padding: var(--hx-comp-paddingTB-s) var(--hx-comp-paddingLR-xs);
   }
 }
 
@@ -342,28 +290,31 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .main-header {
-    padding: var(--spacing-sm) var(--spacing-md);
-    
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      font-size: 18px;
-    }
-    
-    .title-container {
-      h1 {
-        font-size: 18px;
+  .app-container {
+    .content-container {
+      padding: var(--hx-comp-paddingTB-s) var(--hx-comp-paddingLR-xs);
+      gap: var(--hx-comp-margin-s);
+      
+      .grid-row {
+        gap: var(--hx-comp-margin-s);
       }
     }
   }
   
-  .content-container {
-    padding: var(--spacing-md) var(--spacing-sm);
-  }
-  
-  .card {
-    padding: var(--spacing-sm);
+  .main-header {
+    padding: var(--hx-comp-paddingTB-xs) var(--hx-comp-paddingLR-s);
+    
+    .logo-icon {
+      width: var(--hx-comp-size-s);
+      height: var(--hx-comp-size-s);
+      font: var(--hx-font-mark-small);
+    }
+    
+    .title-container {
+      h1 {
+        font: var(--hx-font-headline-small);
+      }
+    }
   }
 }
 </style>

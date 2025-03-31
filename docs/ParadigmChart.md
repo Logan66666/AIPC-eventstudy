@@ -1,38 +1,9 @@
 # 快速上手
 本节内容为标准范式图表组件库ParadigmChart的接入使用文档。
-## 相关链接
-1. 组件库配置项：https://datav.iwencai.com/components/paradigm-chart/docs/apis/option
-2. APIs:https://datav.iwencai.com/components/paradigm-chart/docs/apis/api
-3. 主题配置：https://datav.iwencai.com/components/paradigm-chart/docs/apis/theme
-4. 公共组件APIs：
-AxisPointer: https://datav.iwencai.com/components/paradigm-chart/docs/apis/component/axisPointer
-Grid: https://datav.iwencai.com/components/paradigm-chart/docs/apis/component/grid
-roam: https://datav.iwencai.com/components/paradigm-chart/docs/apis/component/roam
-Tooltips:https://datav.iwencai.com/components/paradigm-chart/docs/apis/component/tooltip
-xAxis:https://datav.iwencai.com/components/paradigm-chart/docs/apis/component/xaxis
-yAxis:https://datav.iwencai.com/components/paradigm-chart/docs/apis/component/yaxis
-
-5. 图表组件APIs
-柱状图：https://datav.iwencai.com/components/paradigm-chart/docs/apis/series/bar
-雷达图：https://datav.iwencai.com/components/paradigm-chart/docs/apis/series/dvRadar
-矩形树图：https://datav.iwencai.com/components/paradigm-chart/docs/apis/series/treemap
-折线图：https://datav.iwencai.com/components/paradigm-chart/docs/apis/series/line
-动态排名图：https://datav.iwencai.com/components/paradigm-chart/docs/apis/series/dvRankLine
-
-LineTimeLineHelper：https://datav.iwencai.com/components/paradigm-chart/docs/apis/helper/LineTimeLineHelper
 
 ## 安装
-
-如果是外网开发，可以通过cdn直接引入构建的 JS 文件
-  {
-    "version": "1.7.3",
-    "assets": [
-      "https://s.thsi.cn/cd/iwc-datav-standard-chart/1.7.3/bundle.umd.min.js",
-      "https://s.thsi.cn/cd/iwc-datav-standard-chart/1.7.3/bundle.umd.js",
-      "https://s.thsi.cn/cd/iwc-datav-standard-chart/1.7.3/bundle.esm.min.js",
-      "https://s.thsi.cn/cd/iwc-datav-standard-chart/1.7.3/bundle.esm.js"
-    ]
-  },
+cdn
+如果是外网开发，可以直接引入构建的 JS 文件：
 
 // umd
 <script src="path/to/bundle.umd.min.js"></script>;
@@ -100,14 +71,14 @@ chart.play({
 dataZoom.slider 和 dataZoom.inside 同时存在时 startValue 和 endValue 失效？
 不要同时配置，二选一。
 
-1. 柱状图
+柱状图
 堆叠柱状图系列的标签文本会自动加文本描边效果？
 当柱状图用在堆叠场景下时，会发现柱子标签文本会随背景色的变化出现文本描边效果，使用以下配置即可消除（参考文档）：
 
 series.label.textBorderColor: 'transparent';
 
-2. 折线图
-3. 矩形树图
+折线图
+矩形树图
 如何触发矩形树图的偏移和缩放
 可以通过官方提供的Action实现（未在文档中申明，需要查阅源码）
 
@@ -158,7 +129,7 @@ const rootRect = treeMapView._containerGroup.getBoundingRect().clone()
 连续setOption时如何取消矩形树图的入场动画
 setOption前执行ECharts上的clear方法即可
 
-4. 气泡图（散点图）
+气泡图（散点图）
 为什么部分label的配置项（比如blur.label）不生效？
 由于气泡从原有的单图元转为多图元，所以需要指定每个图元的label
 

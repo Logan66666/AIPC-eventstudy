@@ -49,14 +49,14 @@
 
   /* 上涨色 */
   --hx-raise-color-1: var(--hx-sec-brand-color-1);
-  --hx-raise-color-2: var(--hx-sec-brand-color-2);
+  --hx-raise-color-2: var(--hx-sec-brand-color-2);  /*上涨、上升、利好等含义常用*/
   --hx-raise-color-3: var(--hx-sec-brand-color-3);
   --hx-raise-color-4: var(--hx-sec-brand-color-4);
   --hx-raise-color-5: var(--hx-sec-brand-color-5);
 
   /* 下跌色 */
   --hx-fall-color-1: var(--green-color-4);
-  --hx-fall-color-2: var(--green-color-5);
+  --hx-fall-color-2: var(--green-color-5);  /*下跌、下降、利空等含义常用*/
   --hx-fall-color-3: var(--green-color-6);
   --hx-fall-color-4: var(--green-color-7);
   --hx-fall-color-5: var(--green-color-8);
@@ -131,7 +131,7 @@
   --hx-bg-color-specialcomponent: transparent;
 
   /* 边框色 */
-  --hx-border-level-1-color: var(--hx-gray-color-4);
+  --hx-border-level-1-color: var(--hx-gray-color-4);  /**/
   --hx-border-level-2-color: var(--hx-gray-color-5);
   --hx-border-level-3-color: var(--hx-gray-color-6);
   --hx-border-level-4-color: var(--hx-gray-color-7);

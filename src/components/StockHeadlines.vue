@@ -1,17 +1,5 @@
 <template>
   <div class="stock-headlines">
-    <div class="headlines-header">
-      <div class="header-left">
-        <h2 class="section-title">核心事件</h2>
-      </div>
-      <div class="header-right">
-        <div class="refresh-status">
-          <span class="pulse-dot"></span>
-          <span class="time">{{ currentTime }} 更新</span>
-        </div>
-      </div>
-    </div>
-    
     <div class="headlines-grid">
       <div 
         v-for="(item, index) in headlines" 
@@ -19,20 +7,18 @@
         class="headline-card"
         :class="{'has-negative': item.NegativeImpact.length > 0}"
       >
-        <!-- 左侧装饰条 -->
-        <div class="card-accent" :class="getBorderClass(item.EventTag)"></div>
-        
         <!-- 卡片头部 -->
         <div class="card-header">
           <div class="event-meta">
             <div class="event-title-wrapper">
               <div class="event-icon" :class="getIconClass(item.EventTag)">
-                <i class="icon-alert"></i>
+                <i class="fas fa-info"></i>
               </div>
               <h3 class="event-title">{{ item.EventName }}</h3>
             </div>
             <div class="event-time">
-              <i class="icon-clock"></i>{{ formatTime(item.Time) }}
+              <i class="far fa-clock"></i>
+              {{ formatTime(item.Time) }}
             </div>
           </div>
           <div class="event-tag" :class="getTagClass(item.EventTag)">
@@ -52,7 +38,7 @@
             <!-- 看点 -->
             <div class="detail-row highlights">
               <div class="row-label">
-                <i class="icon-target"></i>
+                <i class="fas fa-bullseye"></i>
                 <span>看点</span>
               </div>
               <div class="row-content">
@@ -69,7 +55,7 @@
               <!-- 利多影响 -->
               <div v-if="item.PositiveImpact.length" class="impact-row positive">
                 <div class="impact-label">
-                  <i class="icon-trend-up"></i>
+                  <i class="fas fa-arrow-up"></i>
                   <span>利多</span>
                 </div>
                 <div class="impact-tags">
@@ -84,7 +70,7 @@
               <!-- 利空影响 -->
               <div v-if="item.NegativeImpact.length" class="impact-row negative">
                 <div class="impact-label">
-                  <i class="icon-trend-down"></i>
+                  <i class="fas fa-arrow-down"></i>
                   <span>利空</span>
                 </div>
                 <div class="impact-tags">
@@ -104,6 +90,8 @@
 </template>
 
 <script>
+import '@fortawesome/fontawesome-free/css/all.css'
+
 export default {
   name: 'StockHeadlines',
   data() {
@@ -117,7 +105,7 @@ export default {
           "Highlights": "特别国债注资规模超预期/半导体产业扶持政策细则/新能源汽车补贴执行标准",
           "PositiveImpact": ["半导体设备", "新能源汽车", "国有大行"],
           "NegativeImpact": [],
-          "EventTag": "国内政策"
+          "EventTag": "政策"
         },
         {
           "EventName": "中美贸易摩擦升级",
@@ -126,7 +114,7 @@ export default {
           "Highlights": "后续谈判可能性/国内农产品储备投放计划/被制裁美企替代方案",
           "PositiveImpact": ["农业种植", "食品加工", "国产替代"],
           "NegativeImpact": ["消费电子代工", "纺织服装", "跨境电商"],
-          "EventTag": "世界经济"
+          "EventTag": "全球"
         },
         {
           "EventName": "央行释放宽松信号",
@@ -135,7 +123,7 @@ export default {
           "Highlights": "MLF利率调整窗口期/普惠金融定向降准可能性/汇率波动容忍度",
           "PositiveImpact": ["新基建", "科技成长股", "房地产龙头"],
           "NegativeImpact": [],
-          "EventTag": "国内政策"
+          "EventTag": "政策"
         }
       ]
     }
@@ -146,25 +134,25 @@ export default {
     },
     getBorderClass(tag) {
       const classes = {
-        '国内政策': 'policy-border',
-        '世界经济': 'global-border',
-        '行业事件': 'industry-border'
+        '政策': 'policy-border',
+        '全球': 'global-border',
+        '行业': 'industry-border'
       };
       return classes[tag] || 'policy-border';
     },
     getIconClass(tag) {
       const classes = {
-        '国内政策': 'policy-icon',
-        '世界经济': 'global-icon',
-        '行业事件': 'industry-icon'
+        '政策': 'policy-icon',
+        '全球': 'global-icon',
+        '行业': 'industry-icon'
       };
       return classes[tag] || 'policy-icon';
     },
     getTagClass(tag) {
       const classes = {
-        '国内政策': 'policy-tag',
-        '世界经济': 'global-tag',
-        '行业事件': 'industry-tag'
+        '政策': 'policy-tag',
+        '全球': 'global-tag',
+        '行业': 'industry-tag'
       };
       return classes[tag] || 'policy-tag';
     }
@@ -196,17 +184,17 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--hx-size-4);
+    padding-bottom: var(--hx-size-2);
+    border-bottom: 1px solid var(--hx-border-level-1-color);
     
     .header-left {
       .section-title {
         font-size: 18px;
         font-weight: 600;
         margin: 0 0 4px 0;
-        color: var(--text-primary);
-        background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+        color: var(--hx-text-color-primary);
+        background: linear-gradient(to right, var(--hx-brand-color-3), var(--hx-sec-brand-color-3));
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -214,7 +202,7 @@ export default {
       
       .subtitle {
         font-size: 13px;
-        color: var(--text-secondary);
+        color: var(--hx-text-color-secondary);
       }
     }
     
@@ -226,7 +214,7 @@ export default {
         .pulse-dot {
           width: 8px;
           height: 8px;
-          background-color: var(--color-success);
+          background-color: var(--hx-success-color-3);
           border-radius: 50%;
           margin-right: 8px;
           position: relative;
@@ -238,7 +226,7 @@ export default {
             height: 100%;
             top: 0;
             left: 0;
-            background-color: var(--color-success);
+            background-color: var(--hx-success-color-3);
             border-radius: 50%;
             opacity: 0.6;
             animation: pulse 2s infinite;
@@ -247,7 +235,7 @@ export default {
         
         .time {
           font-size: 13px;
-          color: var(--text-secondary);
+          color: var(--hx-text-color-secondary);
         }
       }
     }
@@ -256,15 +244,15 @@ export default {
   .headlines-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
+    gap: var(--hx-size-4);
   }
   
   .headline-card {
     position: relative;
-    background-color: rgba(36, 107, 248, 0.05);
-    border-radius: var(--radius-sm);
+    background-color: var(--hx-bg-color-container);
+    border-radius: var(--hx-radius-default);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
@@ -272,13 +260,13 @@ export default {
     
     &:hover {
       transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-      background-color: rgba(36, 107, 248, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      background-color: var(--hx-bg-color-specialcomponent);
     }
     
     &:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 2px var(--color-secondary), var(--shadow-md);
+      box-shadow: 0 0 0 2px var(--hx-brand-color-3), 0 4px 16px rgba(0, 0, 0, 0.15);
     }
     
     .card-accent {
@@ -287,11 +275,11 @@ export default {
       left: 0;
       width: 4px;
       height: 100%;
-      background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary), var(--color-tertiary));
+      background: linear-gradient(to bottom, var(--hx-brand-color-3), var(--hx-sec-brand-color-3), var(--hx-warning-color-3));
     }
     
     .card-header {
-      padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+      padding: var(--hx-size-4) var(--hx-size-4) var(--hx-size-2);
       display: flex;
       justify-content: space-between;
       position: relative;
@@ -304,7 +292,7 @@ export default {
         right: 0;
         bottom: 0;
         height: 1px;
-        background: var(--border-subtle);
+        background: var(--hx-border-level-1-color);
       }
       
       .event-meta {
@@ -316,112 +304,99 @@ export default {
           margin-bottom: 6px;
           
           .event-icon {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 8px;
             
-            .icon-alert {
-              width: 12px;
-              height: 12px;
-              
-              &:before {
-                content: "!";
-                font-size: 12px;
-                font-weight: bold;
-                line-height: 1;
-              }
+            i {
+              font-size: 12px;
             }
             
             &.policy-icon {
-              background-color: rgba(255, 59, 87, 0.15);
-              color: var(--color-primary);
+              background-color: rgba(var(--hx-brand-color-rgb), 0.1);
+              color: var(--hx-brand-color-3);
             }
             
             &.global-icon {
-              background-color: rgba(36, 107, 248, 0.15);
-              color: var(--color-secondary);
+              background-color: rgba(var(--hx-sec-brand-color-rgb), 0.1);
+              color: var(--hx-sec-brand-color-3);
             }
             
             &.industry-icon {
-              background-color: rgba(255, 149, 0, 0.15);
-              color: var(--color-tertiary);
+              background-color: rgba(var(--hx-warning-color-rgb), 0.1);
+              color: var(--hx-warning-color-3);
             }
           }
           
           .event-title {
             font-size: 15px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--hx-text-color-primary);
             margin: 0;
             line-height: 1.3;
           }
         }
         
         .event-time {
-          font-size: 12px;
-          color: var(--text-tertiary);
           display: flex;
           align-items: center;
-          margin-left: 28px;
+          gap: 4px;
+          margin-left: 32px;
+          color: var(--hx-text-color-tertiary);
+          font: var(--hx-font-body-small);
           
-          .icon-clock {
-            margin-right: 4px;
-            font-size: 10px;
-            
-            &:before {
-              content: "⏱";
-            }
+          i {
+            font-size: 12px;
           }
         }
       }
       
       .event-tag {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 3px 8px;
-        border-radius: 4px;
+        font: var(--hx-font-body-small);
+        padding: 2px 8px;
+        border-radius: var(--hx-radius-small);
         height: fit-content;
-        text-transform: capitalize;
         letter-spacing: 0.5px;
         
         &.policy-tag {
-          background-color: rgba(255, 59, 87, 0.15);
-          color: var(--color-primary);
+          background-color: rgba(var(--hx-brand-color-rgb), 0.1);
+          color: var(--hx-brand-color-3);
         }
         
         &.global-tag {
-          background-color: rgba(36, 107, 248, 0.15);
-          color: var(--color-secondary);
+          background-color: rgba(var(--hx-sec-brand-color-rgb), 0.1);
+          color: var(--hx-sec-brand-color-3);
         }
         
         &.industry-tag {
-          background-color: rgba(255, 149, 0, 0.15);
-          color: var(--color-tertiary);
+          background-color: rgba(var(--hx-warning-color-rgb), 0.1);
+          color: var(--hx-warning-color-3);
         }
       }
     }
     
     .card-content {
-      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+      padding: var(--hx-size-2) var(--hx-size-4) var(--hx-size-4);
       display: flex;
       flex-direction: column;
       flex: 1;
       
       .event-intro {
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--hx-size-4);
         position: relative;
         
         p {
           font-size: 13px;
-          color: var(--text-secondary);
+          color: var(--hx-text-color-secondary);
           line-height: 1.5;
           margin: 0;
           display: -webkit-box;
           -webkit-line-clamp: 3;
+          line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
           position: relative;
@@ -444,8 +419,8 @@ export default {
           position: absolute;
           bottom: -4px;
           right: 0;
-          background-color: var(--text-tertiary);
-          color: var(--text-primary);
+          background-color: var(--hx-text-color-tertiary);
+          color: var(--hx-text-color-primary);
           font-size: 10px;
           padding: 1px 4px;
           border-radius: 2px;
@@ -465,17 +440,12 @@ export default {
             display: flex;
             align-items: center;
             margin-right: 8px;
-            color: var(--text-tertiary);
+            color: var(--hx-text-color-emphasize);
             font-size: 12px;
-            min-width: 42px;
+            min-width: 36px;
             
             .icon-target {
               margin-right: 4px;
-              
-              &:before {
-                content: "◉";
-                font-size: 12px;
-              }
             }
           }
           
@@ -486,10 +456,10 @@ export default {
             
             .highlight-item {
               background-color: rgba(0, 0, 0, 0.2);
-              padding: 2px 6px;
-              border-radius: 3px;
+              padding: 2px 4px;
+              border-radius: 2px;
               font-size: 11px;
-              color: var(--text-secondary);
+              color: var(--hx-text-color-secondary);
               white-space: nowrap;
             }
           }
@@ -508,21 +478,12 @@ export default {
               display: flex;
               align-items: center;
               font-size: 12px;
-              min-width: 42px;
+              min-width: 28px;
               margin-right: 8px;
               
               i {
                 margin-right: 4px;
-                
-                &.icon-trend-up:before {
-                  content: "↑";
-                  color: var(--color-success);
-                }
-                
-                &.icon-trend-down:before {
-                  content: "↓";
-                  color: var(--color-danger);
-                }
+
               }
               
               span {
@@ -531,11 +492,11 @@ export default {
             }
             
             &.positive .impact-label {
-              color: var(--color-success);
+              color: var(--hx-raise-color-2);
             }
             
             &.negative .impact-label {
-              color: var(--color-danger);
+              color: var(--hx-fall-color-2);
             }
             
             .impact-tags {
@@ -544,19 +505,19 @@ export default {
               gap: 6px;
               
               .impact-tag {
-                padding: 2px 6px;
-                border-radius: 3px;
+                padding: 2px 4px;
+                border-radius: 2px;
                 font-size: 11px;
                 white-space: nowrap;
                 
                 &.positive {
-                  background-color: rgba(16, 185, 129, 0.1);
-                  color: var(--color-success);
+                  background-color: rgba(239, 68, 68, 0.1);
+                  color: var(--hx-raise-color-2);
                 }
                 
                 &.negative {
-                  background-color: rgba(239, 68, 68, 0.1);
-                  color: var(--color-danger);
+                  background-color: rgba(16, 185, 129, 0.1);
+                  color: var(--hx-fall-color-2);
                 }
               }
             }

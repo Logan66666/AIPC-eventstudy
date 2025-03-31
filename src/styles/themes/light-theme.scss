@@ -74,11 +74,11 @@
   --hx-font-color-7: #04B8F4;
 
   /* 文本颜色 */
-  --hx-text-color-primary: var(--hx-gray-color-10);
-  --hx-text-color-secondary: var(--hx-gray-color-9);
-  --hx-text-color-tertiary: var(--hx-gray-color-7);
-  --hx-text-color-quaternary: var(--hx-gray-color-6);
-  --hx-text-color-fifth: var(--hx-gray-color-5);
+  --hx-text-color-primary: #2c3e50;
+  --hx-text-color-secondary: #4b5563;
+  --hx-text-color-tertiary: #64748b;
+  --hx-text-color-quaternary: #94a3b8;
+  --hx-text-color-fifth: #cbd5e1;
   --hx-text-color-code: #8A8CF8;
   --hx-text-color-emphasize: #04B8F4;
 
@@ -125,20 +125,20 @@
   --hx-error-color-light-hover: var(--red-color-2);
 
   /* 背景色 */
-  --hx-bg-color-page: var(--hx-gray-color-2);
-  --hx-bg-color-container: var(--hx-gray-color-1);
-  --hx-bg-color-specialcomponent: var(--white);
+  --hx-bg-color-page: #f5f7fa;
+  --hx-bg-color-container: #ffffff;
+  --hx-bg-color-specialcomponent: #f5f7fa;
 
   /* 边框色 */
-  --hx-border-level-1-color: var(--hx-gray-color-3);
-  --hx-border-level-2-color: var(--hx-gray-color-4);
-  --hx-border-level-3-color: var(--hx-gray-color-5);
-  --hx-border-level-4-color: var(--hx-gray-color-6);
-  --hx-border-level-5-color: var(--hx-gray-color-7);
-  --hx-component-border: var(--hx-gray-color-8);
+  --hx-border-level-1-color: #e2e8f0;
+  --hx-border-level-2-color: #cbd5e1;
+  --hx-border-level-3-color: #94a3b8;
+  --hx-border-level-4-color: #64748b;
+  --hx-border-level-5-color: #4b5563;
+  --hx-component-border: #e2e8f0;
 
   /* 滚动条色 */
-  --hx-scrollbar-color: rgba(0, 0, 0, 0.1);
+  --hx-scrollbar-color: rgba(0, 0, 0, 0.15);
   --hx-scrollbar-hover-color: rgba(0, 0, 0, 0.3);
-  --hx-scroll-track-color: #f5f5f5;
+  --hx-scroll-track-color: #f1f5f9;
 }

@@ -67,7 +67,7 @@
             </div>
             
             <div class="impact-analysis">
-              <div class="impact-header">市场影响</div>
+              <div class="impact-header">解读</div>
               <div class="impact-items">
                 <div 
                   v-for="(impact, idx) in policy.impacts" 

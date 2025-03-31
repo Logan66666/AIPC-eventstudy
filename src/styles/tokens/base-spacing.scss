@@ -1,11 +1,11 @@
 :root {
   /* 基础尺寸 */
   --hx-size-1: 2px;
-  --hx-size-2: 4px;
+  --hx-size-2: 4px;  /*常用*/
   --hx-size-3: 6px;
-  --hx-size-4: 8px;
-  --hx-size-5: 12px;
-  --hx-size-6: 16px;
+  --hx-size-4: 8px;  /*常用*/
+  --hx-size-5: 12px;  /*常用*/
+  --hx-size-6: 16px;  /*常用*/
   --hx-size-7: 20px;
   --hx-size-8: 24px;
   --hx-size-9: 28px;
@@ -39,19 +39,19 @@
 
   /* 组件左右边距 */
   --hx-comp-paddingLR-xxs: var(--hx-size-1);
-  --hx-comp-paddingLR-xs: var(--hx-size-2);
-  --hx-comp-paddingLR-s: var(--hx-size-4);
-  --hx-comp-paddingLR-m: var(--hx-size-5);
-  --hx-comp-paddingLR-l: var(--hx-size-6);
+  --hx-comp-paddingLR-xs: var(--hx-size-2);  /*常用*/
+  --hx-comp-paddingLR-s: var(--hx-size-4);  /*常用*/
+  --hx-comp-paddingLR-m: var(--hx-size-5);  /*常用*/
+  --hx-comp-paddingLR-l: var(--hx-size-6);  /*常用*/
   --hx-comp-paddingLR-xl: var(--hx-size-8);
   --hx-comp-paddingLR-xxl: var(--hx-size-10);
 
   /* 组件上下边距 */
   --hx-comp-paddingTB-xxs: var(--hx-size-1);
-  --hx-comp-paddingTB-xs: var(--hx-size-2);
-  --hx-comp-paddingTB-s: var(--hx-size-4);
-  --hx-comp-paddingTB-m: var(--hx-size-5);
-  --hx-comp-paddingTB-l: var(--hx-size-6);
+  --hx-comp-paddingTB-xs: var(--hx-size-2);  /*常用*/
+  --hx-comp-paddingTB-s: var(--hx-size-4);  /*常用*/
+  --hx-comp-paddingTB-m: var(--hx-size-5);  /*常用*/
+  --hx-comp-paddingTB-l: var(--hx-size-6);  /*常用*/
   --hx-comp-paddingTB-xl: var(--hx-size-8);
   --hx-comp-paddingTB-xxl: var(--hx-size-10);
 
@@ -59,7 +59,7 @@
   --hx-comp-margin-xxs: var(--hx-size-1);
   --hx-comp-margin-xs: var(--hx-size-2);
   --hx-comp-margin-s: var(--hx-size-4);
-  --hx-comp-margin-m: var(--hx-size-5);
+  --hx-comp-margin-m: var(--hx-size-5);  /*常用*/
   --hx-comp-margin-l: var(--hx-size-6);
   --hx-comp-margin-xl: var(--hx-size-7);
   --hx-comp-margin-xxl: var(--hx-size-8);
