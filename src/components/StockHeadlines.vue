@@ -12,7 +12,7 @@
           <div class="event-meta">
             <div class="event-title-wrapper">
               <div class="event-icon" :class="getIconClass(item.EventTag)">
-                <i class="fas fa-info"></i>
+                <i :class="getIconForTag(item.EventTag)"></i>
               </div>
               <h3 class="event-title">{{ item.EventName }}</h3>
             </div>
@@ -52,11 +52,11 @@
             
             <!-- 影响分析区域 -->
             <div class="impact-analysis">
-              <!-- 利多影响 -->
+              <!-- 利好影响 -->
               <div v-if="item.PositiveImpact.length" class="impact-row positive">
                 <div class="impact-label">
                   <i class="fas fa-arrow-up"></i>
-                  <span>利多</span>
+                  <span>利好</span>
                 </div>
                 <div class="impact-tags">
                   <div v-for="(tag, idx) in item.PositiveImpact" 
@@ -94,6 +94,8 @@ import '@fortawesome/fontawesome-free/css/all.css'
 
 export default {
   name: 'StockHeadlines',
+  components: {
+  },
   data() {
     return {
       currentTime: new Date().toLocaleTimeString(),
@@ -102,7 +104,7 @@ export default {
           "EventName": "全国两会政策落地",
           "Time": "2025/3/5",
           "Introduction": "2025年政府工作报告设定GDP增长5%目标，赤字率提升至4%，重点部署科技创新（量子计算、AI产业链）、消费提振（新能源汽车置换补贴）和金融改革（5000亿特别国债注资银行）三大战略方向。这是年度最高规格经济政策风向标，直接决定全年财政资金流向。",
-          "Highlights": "特别国债注资规模超预期/半导体产业扶持政策细则/新能源汽车补贴执行标准",
+          "Highlights": "特别国债注资规模超预期/半导体扶持/新能源汽车补贴",
           "PositiveImpact": ["半导体设备", "新能源汽车", "国有大行"],
           "NegativeImpact": [],
           "EventTag": "政策"
@@ -155,6 +157,14 @@ export default {
         '行业': 'industry-tag'
       };
       return classes[tag] || 'policy-tag';
+    },
+    getIconForTag(tag) {
+      const icons = {
+        '政策': 'fas fa-landmark',
+        '全球': 'fas fa-globe-asia',
+        '行业': 'fas fa-industry'
+      };
+      return icons[tag] || 'fas fa-info';
     }
   },
   mounted() {
@@ -179,6 +189,9 @@ export default {
 <style lang="scss" scoped>
 .stock-headlines {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hx-comp-margin-m);
   
   .headlines-header {
     display: flex;
@@ -256,7 +269,6 @@ export default {
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
-    height: 100%;
     
     &:hover {
       transform: translateY(-3px);
@@ -356,11 +368,12 @@ export default {
       }
       
       .event-tag {
-        font: var(--hx-font-body-small);
-        padding: 2px 8px;
-        border-radius: var(--hx-radius-small);
-        height: fit-content;
-        letter-spacing: 0.5px;
+        font-size: 11px;
+        font-weight: normal;
+        padding: 0px 4px;
+        border-radius: 2px;
+        white-space: nowrap;
+        flex-shrink: 0;
         
         &.policy-tag {
           background-color: rgba(var(--hx-brand-color-rgb), 0.1);
@@ -383,10 +396,9 @@ export default {
       padding: var(--hx-size-2) var(--hx-size-4) var(--hx-size-4);
       display: flex;
       flex-direction: column;
-      flex: 1;
       
       .event-intro {
-        margin-bottom: var(--hx-size-4);
+        margin-bottom: var(--hx-size-3);
         position: relative;
         
         p {
@@ -406,6 +418,7 @@ export default {
         &:hover {
           p {
             -webkit-line-clamp: unset;
+            line-clamp: unset;
             z-index: 10;
           }
           
@@ -430,11 +443,10 @@ export default {
       }
       
       .event-details {
-        margin-top: auto;
         
         .detail-row {
           display: flex;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           
           .row-label {
             display: flex;
@@ -468,7 +480,7 @@ export default {
         .impact-analysis {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
           
           .impact-row {
             display: flex;
@@ -483,7 +495,6 @@ export default {
               
               i {
                 margin-right: 4px;
-
               }
               
               span {
@@ -502,10 +513,10 @@ export default {
             .impact-tags {
               display: flex;
               flex-wrap: wrap;
-              gap: 6px;
+              gap: 4px;
               
               .impact-tag {
-                padding: 2px 4px;
+                padding: 0px 4px;
                 border-radius: 2px;
                 font-size: 11px;
                 white-space: nowrap;

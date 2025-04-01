@@ -1,246 +1,555 @@
 <template>
   <div class="industry-focus card">
     <div class="industry-header">
-      <h2 class="card-title secondary-title">行业焦点</h2>
-      <div class="card-subtitle">行业重要事件解读</div>
+      <div class="header-main">
+        <h2 class="card-title secondary-title">行业洞察</h2>
+        <div class="card-subtitle">左侧行业动态前瞻</div>
+      </div>
     </div>
     
-    <div class="industry-content">
+    <!-- 行业切换标签 -->
       <div class="industry-tabs">
         <div 
           v-for="(industry, index) in industries" 
           :key="index" 
-          class="industry-tab"
-          :class="{'active': currentIndustry === industry.id}"
-          @click="currentIndustry = industry.id"
+        class="tab-item"
+        :class="{ active: currentIndustry === industry.code }"
+        @click="switchIndustry(industry.code)"
         >
           {{ industry.name }}
         </div>
       </div>
       
-      <div class="industry-news-grid">
-        <div v-for="(news, index) in currentIndustryNews" :key="index" class="industry-news-item">
-          <h3 class="news-title">{{ news.title }}</h3>
-          <p class="news-content">{{ news.content }}</p>
-          <div class="news-date">{{ news.date }}</div>
+    <!-- 时间线内容 -->
+    <div class="timeline-content">
+      <DataTimeline 
+        :items="currentIndustryItems"
+        @item-expanded="handleItemExpanded"
+      >
+        <template v-slot:item-tag="{ item }">
+          <div class="industry-tag">
+            {{ item.industry }}
+          </div>
+        </template>
+
+        <template v-slot:item-preview="{ item }">
+          <div class="item-preview-content">
+            <div class="preview-header">
+              <div class="time-tag" :class="getTimeTagClass(item.timeTag)">
+                {{ item.timeTag }}
+              </div>
+              <div class="event-type">
+                <i class="fas" :class="getEventTypeIcon(item.eventType)"></i>
+                <span>{{ item.eventType }}</span>
         </div>
       </div>
+            <h3 class="event-title">{{ item.title }}</h3>
+            <p class="event-summary">{{ item.summary }}</p>
+          </div>
+        </template>
+      </DataTimeline>
     </div>
   </div>
 </template>
 
 <script>
+import DataTimeline from './ui/DataTimeline.vue'
+
 export default {
   name: 'IndustryFocus',
+  components: {
+    DataTimeline
+  },
   data() {
     return {
-      currentIndustry: 'tech',
+      currentIndustry: 'real_estate',
       industries: [
-        { id: 'tech', name: '科技' },
-        { id: 'medical', name: '医药' },
-        { id: 'finance', name: '金融' },
-        { id: 'consumer', name: '消费' },
-        { id: 'newEnergy', name: '新能源' }
+        { code: 'real_estate', name: '房地产' },
+        { code: 'finance', name: '金融' },
+        { code: 'technology', name: '科技' },
+        { code: 'energy', name: '能源' },
+        { code: 'healthcare', name: '医疗' }
       ],
-      industryNews: {
-        tech: [
+      industryData: {
+        real_estate: [
           {
-            title: '国内GPU研发取得突破',
-            content: '国内AI芯片企业发布新一代GPU，算力相比上一代提升3倍，标志着国产GPU在AI领域的重要进展',
-            date: '2023-05-18'
+            date: '2025/5/15',
+            title: '一线城市房价持续上涨',
+            summary: '北京、上海等一线城市房价环比上涨2.5%，成交量显著提升',
+            context: '受政策利好和需求释放影响，一线城市房地产市场回暖。',
+            industry: '房地产',
+            timeTag: '短期',
+            eventType: '市场动态',
+            highlights: [
+              {
+                tag: '价格上涨',
+                reason: '一线城市房价环比上涨2.5%'
+              }
+            ],
+            benefits: [
+              {
+                tag: '市场回暖',
+                reason: '房地产市场信心恢复'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '调控压力',
+                reason: '可能引发新一轮调控政策'
+              }
+            ]
           },
           {
-            title: '华为发布新一代自研芯片',
-            content: '华为发布麒麟系列新芯片，采用先进工艺，信号处理能力大幅提升',
-            date: '2023-05-15'
-          },
-          {
-            title: '国内光刻机研发进展',
-            content: '国产28nm光刻机研发取得突破，预计年内可实现量产，推动半导体制造国产化',
-            date: '2023-05-10'
-          }
-        ],
-        medical: [
-          {
-            title: '国产创新药获批上市',
-            content: '本土企业研发的抗肿瘤创新药获批上市，打破国外药企在该领域的垄断',
-            date: '2023-05-16'
-          },
-          {
-            title: '医保谈判结果公布',
-            content: '新一轮医保目录调整谈判结果公布，多款国产创新药纳入医保，价格大幅下降',
-            date: '2023-05-12'
+            date: '2025/5/10',
+            title: '房地产政策持续放松',
+            summary: '多地出台购房补贴政策，首付比例下调',
+            context: '地方政府加大房地产支持力度，促进市场回暖。',
+            industry: '房地产',
+            timeTag: '中期',
+            eventType: '政策变化',
+            highlights: [
+              {
+                tag: '政策放松',
+                reason: '多地出台购房补贴政策'
+              }
+            ],
+            benefits: [
+              {
+                tag: '需求释放',
+                reason: '降低购房门槛，促进需求释放'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '债务风险',
+                reason: '可能增加地方政府债务压力'
+              }
+            ]
           }
         ],
         finance: [
           {
-            title: '银行业一季度业绩公布',
-            content: '上市银行一季度业绩整体平稳，资产质量持续改善，净息差环比回升',
-            date: '2023-05-14'
+            date: '2025/5/15',
+            title: '央行降准释放流动性',
+            summary: '央行下调存款准备金率0.5个百分点，释放长期资金约1万亿元',
+            context: '货币政策持续宽松，支持实体经济发展。',
+            industry: '金融',
+            timeTag: '短期',
+            eventType: '政策变化',
+            highlights: [
+              {
+                tag: '流动性释放',
+                reason: '释放长期资金约1万亿元'
+              }
+            ],
+            benefits: [
+              {
+                tag: '市场利好',
+                reason: '增加市场流动性，提振市场信心'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '通胀压力',
+                reason: '可能增加通胀压力'
+              }
+            ]
           },
           {
-            title: '保险业新政策出台',
-            content: '监管部门发布保险业务新规定，鼓励创新，提高风险管理要求',
-            date: '2023-05-08'
+            date: '2025/5/12',
+            title: '银行业绩超预期',
+            summary: '主要银行一季度净利润同比增长15%，不良率下降',
+            context: '银行业经营状况持续改善，资产质量提升。',
+            industry: '金融',
+            timeTag: '中期',
+            eventType: '业绩报告',
+            highlights: [
+              {
+                tag: '业绩增长',
+                reason: '净利润同比增长15%'
+              }
+            ],
+            benefits: [
+              {
+                tag: '估值提升',
+                reason: '业绩超预期，估值有望提升'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '基数效应',
+                reason: '高基数可能影响后续增长'
+              }
+            ]
           }
         ],
-        consumer: [
+        technology: [
           {
-            title: '618电商大促启动',
-            content: '各大电商平台启动618促销活动，消费电子、家电品类预计销售同比增长',
-            date: '2023-05-17'
+            date: '2025/5/15',
+            title: 'AI技术突破性进展',
+            summary: '某科技公司发布新一代AI模型，性能提升300%',
+            context: 'AI技术快速发展，推动产业升级。',
+            industry: '科技',
+            timeTag: '长期',
+            eventType: '技术创新',
+            highlights: [
+              {
+                tag: '技术突破',
+                reason: 'AI模型性能提升300%'
+              }
+            ],
+            benefits: [
+              {
+                tag: '产业升级',
+                reason: '推动相关产业技术升级'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '竞争加剧',
+                reason: '可能加剧行业竞争'
+              }
+            ]
           },
           {
-            title: '白酒行业复苏趋势明显',
-            content: '五一假期白酒销售数据良好，高端白酒市场需求恢复，渠道库存健康',
-            date: '2023-05-10'
+            date: '2025/5/10',
+            title: '芯片行业新政策',
+            summary: '国家出台芯片产业支持政策，加大研发投入',
+            context: '政策支持芯片产业发展，提升自主创新能力。',
+            industry: '科技',
+            timeTag: '中期',
+            eventType: '政策变化',
+            highlights: [
+              {
+                tag: '政策支持',
+                reason: '加大芯片产业研发投入'
+              }
+            ],
+            benefits: [
+              {
+                tag: '发展机遇',
+                reason: '为芯片企业提供发展机遇'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '投入压力',
+                reason: '企业面临较大研发投入压力'
+              }
+            ]
           }
         ],
-        newEnergy: [
+        energy: [
           {
-            title: '储能产业新政策',
-            content: '国家发改委发布储能产业支持政策，提出到2025年装机规模达30GW的目标',
-            date: '2023-05-19'
+            date: '2025/5/15',
+            title: '新能源装机量创新高',
+            summary: '一季度新能源装机量同比增长50%，储能需求大增',
+            context: '新能源产业快速发展，储能需求提升。',
+            industry: '能源',
+            timeTag: '中期',
+            eventType: '市场动态',
+            highlights: [
+              {
+                tag: '装机增长',
+                reason: '新能源装机量同比增长50%'
+              }
+            ],
+            benefits: [
+              {
+                tag: '产业机会',
+                reason: '储能产业迎来发展机遇'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '并网压力',
+                reason: '电网消纳压力增加'
+              }
+            ]
           },
           {
-            title: '海上风电项目批量核准',
-            content: '多个省份批量核准海上风电项目，总装机容量超过10GW，带动风电产业链发展',
-            date: '2023-05-13'
+            date: '2025/5/12',
+            title: '储能行业规划发布',
+            summary: '国家发布储能产业发展规划，明确发展目标',
+            context: '储能产业迎来政策支持，发展前景广阔。',
+            industry: '能源',
+            timeTag: '长期',
+            eventType: '政策变化',
+            highlights: [
+              {
+                tag: '政策支持',
+                reason: '明确储能产业发展目标'
+              }
+            ],
+            benefits: [
+              {
+                tag: '发展机遇',
+                reason: '储能产业迎来发展机遇'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '技术挑战',
+                reason: '面临技术突破和成本降低压力'
+              }
+            ]
+          }
+        ],
+        healthcare: [
+          {
+            date: '2025/5/15',
+            title: '创新药审批加速',
+            summary: '创新药审批时间缩短50%，研发效率提升',
+            context: '药品审批制度改革，促进创新药研发。',
+            industry: '医疗',
+            timeTag: '中期',
+            eventType: '政策变化',
+            highlights: [
+              {
+                tag: '审批加速',
+                reason: '创新药审批时间缩短50%'
+              }
+            ],
+            benefits: [
+              {
+                tag: '研发效率',
+                reason: '提高创新药研发效率'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '质量风险',
+                reason: '可能增加药品质量风险'
+              }
+            ]
+          },
+          {
+            date: '2025/5/10',
+            title: '医保目录调整',
+            summary: '医保目录新增50个创新药，支付标准优化',
+            context: '医保政策支持创新药发展，提升可及性。',
+            industry: '医疗',
+            timeTag: '短期',
+            eventType: '政策变化',
+            highlights: [
+              {
+                tag: '目录更新',
+                reason: '新增50个创新药'
+              }
+            ],
+            benefits: [
+              {
+                tag: '市场扩容',
+                reason: '创新药市场空间扩大'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '支付压力',
+                reason: '医保基金支付压力增加'
+              }
+            ]
           }
         ]
       }
     }
   },
   computed: {
-    currentIndustryNews() {
-      return this.industryNews[this.currentIndustry] || []
+    currentIndustryItems() {
+      const items = this.industryData[this.currentIndustry] || []
+      return items.sort((a, b) => new Date(a.date) - new Date(b.date))
+    }
+  },
+  methods: {
+    switchIndustry(code) {
+      this.currentIndustry = code
+    },
+    handleItemExpanded() {
+      // 空方法，保留以便接收事件
+    },
+    getTimeTagClass(tag) {
+      return {
+        '短期': 'time-short',
+        '中期': 'time-mid',
+        '长期': 'time-long'
+      }[tag] || ''
+    },
+    getEventTypeIcon(type) {
+      return {
+        '市场动态': 'fa-chart-line',
+        '政策变化': 'fa-file-alt',
+        '技术创新': 'fa-lightbulb',
+        '业绩报告': 'fa-file-invoice-dollar'
+      }[type] || 'fa-info-circle'
     }
   }
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .industry-focus {
   height: 100%;
+  max-height: 600px;
   display: flex;
   flex-direction: column;
+  background-color: var(--hx-bg-color-container);
+  padding: 0;
   
   .industry-header {
-    margin-bottom: var(--spacing-md);
-  }
-  
-  .industry-content {
-    flex: 1;
+    padding: var(--hx-comp-paddingTB-s) var(--hx-comp-paddingLR-s);
+    flex-shrink: 0;
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    justify-content: space-between;
+    align-items: flex-start;
+    
+    .header-main {
+      flex: 1;
+      
+      .secondary-title {
+        position: relative;
+        
+        &::before {
+          content: '';
+          display: inline-block;
+          width: 4px;
+          height: 16px;
+          background-color: var(--hx-border-level-3-color);
+          margin-right: 8px;
+          border-radius: 2px;
+          vertical-align: middle;
+        }
+      }
+      
+      .card-subtitle {
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--hx-text-color-secondary);
+      }
+    }
   }
   
   .industry-tabs {
     display: flex;
-    margin-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 var(--hx-comp-paddingLR-s);
+    gap: var(--hx-comp-margin-s);
+    background-color: var(--hx-bg-color-container);
     overflow-x: auto;
     
     &::-webkit-scrollbar {
       height: 4px;
     }
     
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
+    &::-webkit-scrollbar-track {
+      background: var(--hx-bg-color-container);
     }
     
-    .industry-tab {
-      padding: 8px 12px;
-      margin-right: var(--spacing-md);
-      font-size: 14px;
-      color: var(--text-tertiary);
+    &::-webkit-scrollbar-thumb {
+      background: var(--hx-bg-color-specialcomponent);
+      border-radius: 2px;
+    }
+
+    .tab-item {
+      padding: 4px 8px;
       cursor: pointer;
-      position: relative;
       transition: all 0.2s ease;
       white-space: nowrap;
+      color: var(--hx-text-color-secondary);
+      font-size: 13px;
+      position: relative;
       
       &:hover {
-        color: var(--text-secondary);
+        color: var(--hx-text-color-primary);
       }
       
       &.active {
-        color: var(--color-secondary);
+        color: var(--hx-brand-color-3);
         font-weight: 600;
         
-        &:after {
+        &::after {
           content: '';
           position: absolute;
-          bottom: -1px;
+          bottom: 0;
           left: 0;
           width: 100%;
           height: 2px;
-          background-color: var(--color-secondary);
+          background-color: var(--hx-brand-color-3);
         }
       }
     }
   }
-  
-  .industry-news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--spacing-md);
-    overflow-y: auto;
-    padding-right: var(--spacing-sm);
-    
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
+
+  .timeline-content {
+    flex: 1;
+    overflow: hidden;
+    padding: var(--hx-comp-paddingTB-s) 0;
   }
-  
-  .industry-news-item {
-    background-color: rgba(36, 107, 248, 0.05);
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-md);
-    transition: all 0.25s ease;
-    display: flex;
-    flex-direction: column;
+
+  .item-preview-content {
+    flex: 1;
+    min-width: 0;
     
-    &:hover {
-      background-color: rgba(36, 107, 248, 0.08);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      
+      .time-tag {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 2px;
+        white-space: nowrap;
+        
+        &.time-short {
+          background-color: rgba(var(--hx-brand-color-rgb), 0.1);
+          color: var(--hx-brand-color-3);
+        }
+        
+        &.time-mid {
+          background-color: rgba(var(--hx-warning-color-rgb), 0.1);
+          color: var(--hx-warning-color-3);
+        }
+        
+        &.time-long {
+          background-color: rgba(var(--hx-sec-brand-color-rgb), 0.1);
+          color: var(--hx-sec-brand-color-3);
+        }
+      }
+      
+      .event-type {
+    display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        
+        i {
+          font-size: 12px;
+          color: var(--hx-text-color-secondary);
+        }
+        
+        span {
+          color: var(--hx-text-color-secondary);
+        }
+      }
     }
     
-    .news-title {
-      font-size: 15px;
+    .event-title {
+      margin: 0 0 4px;
+      font-size: 14px;
       font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 var(--spacing-sm) 0;
+      color: var(--hx-text-color-primary);
       line-height: 1.4;
     }
     
-    .news-content {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin: 0 0 var(--spacing-md) 0;
-      line-height: 1.5;
-      flex: 1;
-    }
-    
-    .news-date {
+    .event-summary {
+      margin: 0;
       font-size: 12px;
-      color: var(--text-tertiary);
-      align-self: flex-end;
-    }
-  }
-}
-
-@media (max-width: 1024px) {
-  .industry-focus {
-    .industry-news-grid {
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      color: var(--hx-text-color-secondary);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   }
 }
@@ -248,24 +557,10 @@ export default {
 @media (max-width: 768px) {
   .industry-focus {
     .industry-tabs {
-      .industry-tab {
+      padding: 0 var(--hx-comp-paddingLR-xs);
+      
+      .tab-item {
         padding: 6px 8px;
-        font-size: 13px;
-      }
-    }
-    
-    .industry-news-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .industry-news-item {
-      padding: var(--spacing-sm);
-      
-      .news-title {
-        font-size: 14px;
-      }
-      
-      .news-content {
         font-size: 12px;
       }
     }

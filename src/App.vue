@@ -18,36 +18,32 @@
 
     <!-- 内容区域 -->
     <div class="content-container">
-      <!-- 调试组件 -->
-      <div class="grid-row" v-if="showDebug">
-        <DebugStyleVars />
-      </div>
-      
       <!-- 股市头条部分 -->
       <div class="grid-row">
         <StockHeadlines />
       </div>
       
+      <!-- 埋伏机会和风险预警部分 -->
+      <div class="grid-row two-columns">
+        <InvestmentOpportunity />
+        <RiskWarning />
+      </div>
+
+      <!-- 财经日历部分 -->
+      <div class="grid-row">
+        <FinancialCalendar />
+      </div>
+
       <!-- 世界经济和政策催化部分 -->
       <div class="grid-row two-columns">
         <WorldEconomy />
         <PolicyCatalysts />
       </div>
       
-      <!-- 埋伏机会和行业焦点部分 -->
+      <!-- 行业焦点和公司新闻部分 -->
       <div class="grid-row two-columns">
-        <InvestmentOpportunity />
         <IndustryFocus />
-      </div>
-      
-      <!-- 公司新闻部分 -->
-      <div class="grid-row">
         <CompanyNews />
-      </div>
-      
-      <!-- 财经日历部分 -->
-      <div class="grid-row">
-        <FinancialCalendar />
       </div>
     </div>
   </div>
@@ -62,7 +58,7 @@ import InvestmentOpportunity from './components/InvestmentOpportunity.vue'
 import IndustryFocus from './components/IndustryFocus.vue'
 import CompanyNews from './components/CompanyNews.vue'
 import FinancialCalendar from './components/FinancialCalendar.vue'
-import DebugStyleVars from './components/ui/DebugStyleVars.vue'
+import RiskWarning from './components/RiskWarning.vue'
 
 export default {
   name: 'App',
@@ -75,12 +71,11 @@ export default {
     IndustryFocus,
     CompanyNews,
     FinancialCalendar,
-    DebugStyleVars
+    RiskWarning
   },
   data() {
     return {
-      currentTheme: 'default',
-      showDebug: false // 设置为true可以显示调试组件
+      currentTheme: 'default'
     }
   },
   methods: {
@@ -96,20 +91,6 @@ export default {
       // 更新当前主题
       this.currentTheme = theme;
     }
-  },
-  mounted() {
-    // 检查URL参数是否启用调试模式
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('debug') === 'true') {
-      this.showDebug = true;
-    }
-    
-    // 按D键切换调试模式
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'd' && e.ctrlKey) {
-        this.showDebug = !this.showDebug;
-      }
-    });
   }
 }
 </script>
