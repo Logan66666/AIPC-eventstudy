@@ -48,15 +48,14 @@
           </div>
         </template>
 
+        <template v-slot:item-title="{ item }">
+          <h3 class="item-title">{{ item.title }}</h3>
+        </template>
+
         <template v-slot:item-preview="{ item }">
           <div class="item-preview-content">
             <div class="preview-header">
-              <div class="risk-level">
-                <i class="fas fa-exclamation-triangle" :class="getRiskLevelIconClass(item.riskLevel)"></i>
-                <span>风险等级 {{ item.riskLevel }}</span>
-              </div>
             </div>
-            <h3 class="event-title">{{ item.title }}</h3>
             <p class="event-summary">{{ item.summary }}</p>
           </div>
         </template>
@@ -308,13 +307,7 @@ export default {
     handleItemExpanded() {
       // 空方法，保留以便接收事件
     },
-    getRiskLevelIconClass(level) {
-      return {
-        '高风险': 'risk-high-icon',
-        '中风险': 'risk-mid-icon',
-        '低风险': 'risk-low-icon'
-      }[level] || ''
-    }
+
   }
 }
 </script>

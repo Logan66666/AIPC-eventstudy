@@ -3,7 +3,7 @@
     <div class="industry-header">
       <div class="header-main">
         <h2 class="card-title secondary-title">行业洞察</h2>
-        <div class="card-subtitle">左侧行业动态前瞻</div>
+        <div class="card-subtitle">热门行业动态与发展趋势</div>
       </div>
     </div>
     
@@ -27,23 +27,15 @@
         @item-expanded="handleItemExpanded"
       >
         <template v-slot:item-tag="{ item }">
-          <div class="industry-tag">
-            {{ item.industry }}
-          </div>
+          <EventTag :text="item.eventType" :type="getEventTypeClass(item.eventType)" />
         </template>
-
+        
+        <template v-slot:item-title="{ item }">
+          <h3 class="item-title">{{ item.title }}</h3>
+        </template>
+        
         <template v-slot:item-preview="{ item }">
           <div class="item-preview-content">
-            <div class="preview-header">
-              <div class="time-tag" :class="getTimeTagClass(item.timeTag)">
-                {{ item.timeTag }}
-              </div>
-              <div class="event-type">
-                <i class="fas" :class="getEventTypeIcon(item.eventType)"></i>
-                <span>{{ item.eventType }}</span>
-        </div>
-      </div>
-            <h3 class="event-title">{{ item.title }}</h3>
             <p class="event-summary">{{ item.summary }}</p>
           </div>
         </template>
@@ -54,15 +46,22 @@
 
 <script>
 import DataTimeline from './ui/DataTimeline.vue'
+import EventTag from './ui/EventTag.vue'
 
 export default {
   name: 'IndustryFocus',
   components: {
-    DataTimeline
+    DataTimeline,
+    EventTag
   },
   data() {
     return {
       currentIndustry: 'real_estate',
+      timeTagTypeMap: {
+        '短期': 'time-short',
+        '中期': 'time-mid',
+        '长期': 'time-long'
+      },
       industries: [
         { code: 'real_estate', name: '房地产' },
         { code: 'finance', name: '金融' },
@@ -74,111 +73,82 @@ export default {
         real_estate: [
           {
             date: '2025/5/15',
-            title: '一线城市房价持续上涨',
-            summary: '北京、上海等一线城市房价环比上涨2.5%，成交量显著提升',
-            context: '受政策利好和需求释放影响，一线城市房地产市场回暖。',
-            industry: '房地产',
+            title: '【房地产】一线城市房价环比上涨，市场预期改善',
+            summary: '一线城市新房和二手房价格环比上涨，成交量持续回暖，市场信心逐步恢复',
+            context: '房地产市场企稳回暖，重点城市带动作用显现。',
             timeTag: '短期',
-            eventType: '市场动态',
+            importance: 3,
+            eventType: '市场表现',
             highlights: [
               {
-                tag: '价格上涨',
-                reason: '一线城市房价环比上涨2.5%'
+                tag: '成交回暖',
+                reason: '一线城市带动，市场预期改善'
               }
             ],
             benefits: [
               {
-                tag: '市场回暖',
-                reason: '房地产市场信心恢复'
+                tag: '信心恢复',
+                reason: '市场预期改善带动相关产业链复苏'
               }
             ],
             drawbacks: [
               {
-                tag: '调控压力',
-                reason: '可能引发新一轮调控政策'
-              }
-            ]
-          },
-          {
-            date: '2025/5/10',
-            title: '房地产政策持续放松',
-            summary: '多地出台购房补贴政策，首付比例下调',
-            context: '地方政府加大房地产支持力度，促进市场回暖。',
-            industry: '房地产',
-            timeTag: '中期',
-            eventType: '政策变化',
-            highlights: [
-              {
-                tag: '政策放松',
-                reason: '多地出台购房补贴政策'
-              }
-            ],
-            benefits: [
-              {
-                tag: '需求释放',
-                reason: '降低购房门槛，促进需求释放'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '债务风险',
-                reason: '可能增加地方政府债务压力'
-              }
-            ]
-          }
-        ],
-        finance: [
-          {
-            date: '2025/5/15',
-            title: '央行降准释放流动性',
-            summary: '央行下调存款准备金率0.5个百分点，释放长期资金约1万亿元',
-            context: '货币政策持续宽松，支持实体经济发展。',
-            industry: '金融',
-            timeTag: '短期',
-            eventType: '政策变化',
-            highlights: [
-              {
-                tag: '流动性释放',
-                reason: '释放长期资金约1万亿元'
-              }
-            ],
-            benefits: [
-              {
-                tag: '市场利好',
-                reason: '增加市场流动性，提振市场信心'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '通胀压力',
-                reason: '可能增加通胀压力'
+                tag: '分化加剧',
+                reason: '城市间分化明显，三四线压力仍大'
               }
             ]
           },
           {
             date: '2025/5/12',
-            title: '银行业绩超预期',
-            summary: '主要银行一季度净利润同比增长15%，不良率下降',
-            context: '银行业经营状况持续改善，资产质量提升。',
-            industry: '金融',
+            title: '【房企科技】智慧社区解决方案突破，获多地采用',
+            summary: '龙头房企智慧社区解决方案在多个城市落地，物业服务数字化升级提速',
+            context: '房地产行业数字化转型提速，服务模式创新。',
             timeTag: '中期',
-            eventType: '业绩报告',
+            importance: 2,
+            eventType: '技术突破',
             highlights: [
               {
-                tag: '业绩增长',
-                reason: '净利润同比增长15%'
+                tag: '技术创新',
+                reason: '智慧社区解决方案实现突破，服务效率提升'
               }
             ],
             benefits: [
               {
-                tag: '估值提升',
-                reason: '业绩超预期，估值有望提升'
+                tag: '服务升级',
+                reason: '物业服务数字化带来新的增长点'
               }
             ],
             drawbacks: [
               {
-                tag: '基数效应',
-                reason: '高基数可能影响后续增长'
+                tag: '投入压力',
+                reason: '技术升级需要较大资金投入'
+              }
+            ]
+          },
+          {
+            date: '2025/5/10',
+            title: '【房地产政策】差异化住房信贷政策出台',
+            summary: '央行、银保监会联合发文，实施城市差异化住房信贷政策',
+            context: '因城施策持续深化，政策工具箱不断丰富。',
+            timeTag: '长期',
+            importance: 3,
+            eventType: '政策动向',
+            highlights: [
+              {
+                tag: '政策优化',
+                reason: '差异化信贷政策有利于市场平稳发展'
+              }
+            ],
+            benefits: [
+              {
+                tag: '融资改善',
+                reason: '优质房企融资环境有望改善'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '执行难度',
+                reason: '政策落地执行存在不确定性'
               }
             ]
           }
@@ -186,111 +156,82 @@ export default {
         technology: [
           {
             date: '2025/5/15',
-            title: 'AI技术突破性进展',
-            summary: '某科技公司发布新一代AI模型，性能提升300%',
-            context: 'AI技术快速发展，推动产业升级。',
-            industry: '科技',
-            timeTag: '长期',
-            eventType: '技术创新',
+            title: '【AI芯片】国产AI芯片算力突破，性能提升50%',
+            summary: '多家芯片企业发布新一代AI芯片，算力较上代提升显著，获头部互联网公司采购',
+            context: '国产AI芯片加速突破，产业链本土化提速。',
+            timeTag: '短期',
+            importance: 3,
+            eventType: '技术突破',
             highlights: [
               {
-                tag: '技术突破',
-                reason: 'AI模型性能提升300%'
+                tag: '性能提升',
+                reason: '新一代产品性能大幅提升，达到国际先进水平'
               }
             ],
             benefits: [
               {
-                tag: '产业升级',
-                reason: '推动相关产业技术升级'
+                tag: '市场认可',
+                reason: '头部客户采购证明产品竞争力'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '研发投入',
+                reason: '持续突破需要大量研发投入'
+              }
+            ]
+          },
+          {
+            date: '2025/5/13',
+            title: '【软件服务】国产基础软件市占率提升',
+            summary: '国产操作系统和数据库在政企市场渗透率持续提升，商业化生态逐步完善',
+            context: '基础软件国产化进程加速，产业链生态持续完善。',
+            timeTag: '中期',
+            importance: 2,
+            eventType: '市场表现',
+            highlights: [
+              {
+                tag: '份额提升',
+                reason: '政企市场国产化率显著提升'
+              }
+            ],
+            benefits: [
+              {
+                tag: '生态完善',
+                reason: '商业化生态逐步成熟'
               }
             ],
             drawbacks: [
               {
                 tag: '竞争加剧',
-                reason: '可能加剧行业竞争'
+                reason: '国际厂商加大本土化力度'
               }
             ]
           },
           {
             date: '2025/5/10',
-            title: '芯片行业新政策',
-            summary: '国家出台芯片产业支持政策，加大研发投入',
-            context: '政策支持芯片产业发展，提升自主创新能力。',
-            industry: '科技',
-            timeTag: '中期',
-            eventType: '政策变化',
-            highlights: [
-              {
-                tag: '政策支持',
-                reason: '加大芯片产业研发投入'
-              }
-            ],
-            benefits: [
-              {
-                tag: '发展机遇',
-                reason: '为芯片企业提供发展机遇'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '投入压力',
-                reason: '企业面临较大研发投入压力'
-              }
-            ]
-          }
-        ],
-        energy: [
-          {
-            date: '2025/5/15',
-            title: '新能源装机量创新高',
-            summary: '一季度新能源装机量同比增长50%，储能需求大增',
-            context: '新能源产业快速发展，储能需求提升。',
-            industry: '能源',
-            timeTag: '中期',
-            eventType: '市场动态',
-            highlights: [
-              {
-                tag: '装机增长',
-                reason: '新能源装机量同比增长50%'
-              }
-            ],
-            benefits: [
-              {
-                tag: '产业机会',
-                reason: '储能产业迎来发展机遇'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '并网压力',
-                reason: '电网消纳压力增加'
-              }
-            ]
-          },
-          {
-            date: '2025/5/12',
-            title: '储能行业规划发布',
-            summary: '国家发布储能产业发展规划，明确发展目标',
-            context: '储能产业迎来政策支持，发展前景广阔。',
-            industry: '能源',
+            title: '【科技监管】数据安全法配套政策落地',
+            summary: '多部委联合发布数据安全配套政策，明确重点行业监管要求',
+            context: '数据安全监管框架完善，行业发展更加规范。',
             timeTag: '长期',
-            eventType: '政策变化',
+            importance: 3,
+            eventType: '政策动向',
             highlights: [
               {
-                tag: '政策支持',
-                reason: '明确储能产业发展目标'
+                tag: '政策完善',
+                reason: '监管框架更加清晰，有利于长期发展'
               }
             ],
             benefits: [
               {
-                tag: '发展机遇',
-                reason: '储能产业迎来发展机遇'
+                tag: '规范发展',
+                reason: '有助于行业良性竞争'
               }
             ],
             drawbacks: [
               {
-                tag: '技术挑战',
-                reason: '面临技术突破和成本降低压力'
+                tag: '合规成本',
+                reason: '企业合规成本上升'
               }
             ]
           }
@@ -298,55 +239,82 @@ export default {
         healthcare: [
           {
             date: '2025/5/15',
-            title: '创新药审批加速',
-            summary: '创新药审批时间缩短50%，研发效率提升',
-            context: '药品审批制度改革，促进创新药研发。',
-            industry: '医疗',
-            timeTag: '中期',
-            eventType: '政策变化',
+            title: '【医疗器械】国产高端医疗设备获批上市',
+            summary: '多款国产高端医疗设备获批上市，打破国外垄断，性价比优势明显',
+            context: '高端医疗器械国产化取得突破，进口替代加速。',
+            timeTag: '短期',
+            importance: 3,
+            eventType: '技术突破',
             highlights: [
               {
-                tag: '审批加速',
-                reason: '创新药审批时间缩短50%'
+                tag: '技术突破',
+                reason: '关键技术取得突破，打破国外垄断'
               }
             ],
             benefits: [
               {
-                tag: '研发效率',
-                reason: '提高创新药研发效率'
+                tag: '成本优势',
+                reason: '高性价比优势有利于市场推广'
               }
             ],
             drawbacks: [
               {
-                tag: '质量风险',
-                reason: '可能增加药品质量风险'
+                tag: '市场考验',
+                reason: '临床认可需要时间积累'
+              }
+            ]
+          },
+          {
+            date: '2025/5/12',
+            title: '【医药流通】"两票制"推广深化，行业集中度提升',
+            summary: '医药流通"两票制"向更多地区推广，龙头企业市占率持续提升',
+            context: '医药流通领域改革深化，行业整合加速。',
+            timeTag: '中期',
+            importance: 2,
+            eventType: '市场表现',
+            highlights: [
+              {
+                tag: '集中度提升',
+                reason: '政策推动行业整合，龙头优势扩大'
+              }
+            ],
+            benefits: [
+              {
+                tag: '效率提升',
+                reason: '渠道扁平化提升流通效率'
+              }
+            ],
+            drawbacks: [
+              {
+                tag: '转型压力',
+                reason: '中小企业转型压力加大'
               }
             ]
           },
           {
             date: '2025/5/10',
-            title: '医保目录调整',
-            summary: '医保目录新增50个创新药，支付标准优化',
-            context: '医保政策支持创新药发展，提升可及性。',
-            industry: '医疗',
-            timeTag: '短期',
-            eventType: '政策变化',
+            title: '【医保政策】医保目录调整政策出台',
+            summary: '国家医保局发布新版医保目录调整方案，优化准入规则',
+            context: '医保支付改革持续深化，行业格局面临重塑。',
+            timeTag: '长期',
+            importance: 3,
+            eventType: '政策动向',
             highlights: [
               {
-                tag: '目录更新',
-                reason: '新增50个创新药'
+                tag: '政策优化',
+                reason: '准入规则更加科学，激励创新'
               }
             ],
             benefits: [
               {
-                tag: '市场扩容',
-                reason: '创新药市场空间扩大'
+                tag: '创新激励',
+                reason: '有利于创新药研发投入'
               }
             ],
             drawbacks: [
               {
-                tag: '支付压力',
-                reason: '医保基金支付压力增加'
+                tag: '价格压力',
+                reason: '医保控费趋严，降价压力加大'
               }
             ]
           }
@@ -367,20 +335,13 @@ export default {
     handleItemExpanded() {
       // 空方法，保留以便接收事件
     },
-    getTimeTagClass(tag) {
-      return {
-        '短期': 'time-short',
-        '中期': 'time-mid',
-        '长期': 'time-long'
-      }[tag] || ''
-    },
-    getEventTypeIcon(type) {
-      return {
-        '市场动态': 'fa-chart-line',
-        '政策变化': 'fa-file-alt',
-        '技术创新': 'fa-lightbulb',
-        '业绩报告': 'fa-file-invoice-dollar'
-      }[type] || 'fa-info-circle'
+    getEventTypeClass(type) {
+      const typeClasses = {
+        '政策动向': 'event-policy',
+        '技术突破': 'event-tech',
+        '市场表现': 'event-market'
+      };
+      return typeClasses[type] || '';
     }
   }
 }
@@ -403,15 +364,15 @@ export default {
     align-items: flex-start;
     
     .header-main {
-      flex: 1;
+    flex: 1;
       
       .secondary-title {
         position: relative;
-        
+    
         &::before {
           content: '';
           display: inline-block;
-          width: 4px;
+      width: 4px;
           height: 16px;
           background-color: var(--hx-border-level-3-color);
           margin-right: 8px;
@@ -427,7 +388,7 @@ export default {
       }
     }
   }
-  
+
   .industry-tabs {
     display: flex;
     padding: 0 var(--hx-comp-paddingLR-s);
@@ -488,62 +449,9 @@ export default {
     flex: 1;
     min-width: 0;
     
-    .preview-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-      
-      .time-tag {
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 2px;
-        white-space: nowrap;
-        
-        &.time-short {
-          background-color: rgba(var(--hx-brand-color-rgb), 0.1);
-          color: var(--hx-brand-color-3);
-        }
-        
-        &.time-mid {
-          background-color: rgba(var(--hx-warning-color-rgb), 0.1);
-          color: var(--hx-warning-color-3);
-        }
-        
-        &.time-long {
-          background-color: rgba(var(--hx-sec-brand-color-rgb), 0.1);
-          color: var(--hx-sec-brand-color-3);
-        }
-      }
-      
-      .event-type {
-    display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        
-        i {
-          font-size: 12px;
-          color: var(--hx-text-color-secondary);
-        }
-        
-        span {
-          color: var(--hx-text-color-secondary);
-        }
-      }
-    }
-    
-    .event-title {
-      margin: 0 0 4px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--hx-text-color-primary);
-      line-height: 1.4;
-    }
-    
     .event-summary {
       margin: 0;
-      font-size: 12px;
+        font-size: 12px;
       color: var(--hx-text-color-secondary);
       line-height: 1.5;
       display: -webkit-box;
@@ -565,5 +473,30 @@ export default {
       }
     }
   }
+}
+
+/* 自定义EventTag样式 */
+:deep(.event-tag) {
+  &.event-policy {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #f59e0b; /* 黄色 - 政策动向 */
+  }
+  
+  &.event-tech {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #ef4444; /* 红色 - 技术突破 */
+  }
+  
+  &.event-market {
+    background-color: rgba(36, 107, 248, 0.15);
+    color: var(--hx-brand-color-3); /* 蓝色 - 市场表现 */
+  }
+}
+
+/* 调整preview-header样式 */
+.preview-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 </style> 

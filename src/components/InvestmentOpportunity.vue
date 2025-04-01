@@ -48,9 +48,12 @@
             </div>
         </template>
         
+        <template v-slot:item-title="{ item }">
+          <h3 class="item-title">{{ item.title }}</h3>
+        </template>
+        
         <template v-slot:item-preview="{ item }">
           <div class="item-preview-content">
-            <h3 class="event-title">{{ item.title }}</h3>
             <p class="event-summary">{{ item.summary }}</p>
           </div>
         </template>

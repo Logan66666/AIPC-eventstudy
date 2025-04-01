@@ -37,7 +37,9 @@
             <div class="item-title-row">
               <div class="item-tag-and-title">
                 <slot name="item-tag" :item="item"></slot>
-                <h3 class="item-title">{{ item.title }}</h3>
+                <slot name="item-title" :item="item">
+                  <h3 class="item-title">{{ item.title }}</h3>
+                </slot>
                 <slot name="item-indicators" :item="item"></slot>
               </div>
               
@@ -48,7 +50,11 @@
             </div>
             
             <!-- 预览区域 -->
-            <div class="item-preview">{{ item.summary }}</div>
+            <div class="item-preview">
+              <slot name="item-preview" :item="item">
+                {{ item.summary }}
+              </slot>
+            </div>
             
             <!-- 详情区域 -->
             <div class="item-details" v-show="expandedItem === index">
