@@ -1,0 +1,66 @@
+# StockHeadlines
+
+## 请求数据：使用异步执行的方式调用接口，然后根据 执行id 轮询请求处理结果，直到成功获取数据
+### 异步请求方式：
+接口URL：http://agent-robot-engine-server/api/pipeline/v1/sync/execute
+请求方式：POST
+
+request headers:
+    X-Arsenal-Auth: arsenal-tools
+    Content-Type: application/json
+    X-Remote-Ip: 10.0.32.56
+    X-Remote-Svc: ai-agent-server
+    X-Session-Id: 16406165168564
+    X-Trace-Id: 2564651651654
+    X-User-Id: 516290709
+
+request body:
+{
+    "mode": "WORK_FLOW",
+    "pipe_name": "11006",
+    "input_variable_value": {"query": "hello"}
+}
+
+### 异步返回结果示例
+{
+    "status_msg": "ok",
+    "status_code": 200,
+    "responce": {
+        "execute_id": "d6caa37a-e048-40b4-a4a4-e5ffc717feec"
+    },
+    "usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0,
+        "enable": false
+    },
+    "cost_time": 0
+}
+
+
+### 轮询请求方式：
+接口URL：http://agent-robot-engine-server/api/pipeline/v1/sync/result
+请求方式：POST
+
+request headers:
+    X-Arsenal-Auth: arsenal-tools
+    Content-Type: application/json
+    X-Remote-Ip: 10.0.32.56
+    X-Remote-Svc: ai-agent-server
+    X-Session-Id: 16406165168564
+    X-Trace-Id: 2564651651654
+    X-User-Id: 516290709
+
+request body:
+{
+    "execute_id": "d6caa37a-e048-40b4-a4a4-e5ffc717feec"
+}
+
+### 轮询返回结果示例
+{
+    "status_msg":"ok",
+    "status_code":200,
+    "execute_id":"d6caa37a-e048-40b4-a4a4-e5ffc717feec",
+    "execute_status":"success",
+    "response":{"text":"\n\n```json\n[\n    {\n        \"EventName\": \"美国全球关税调整方案实施\",\n        \"Time\": \"2025/4/3\",\n        \"Introduction\": \"美国宣布将所有国家基准关税税率定为10%，对欧盟和日本分别实施20%和24%的对等关税，导致美元指数大涨，离岸人民币汇率单日贬值超140基点。此调整直接影响全球贸易结构，可能引发供应链重构。\",\n        \"Highlights\": \"后续各国反制措施、出口企业应对策略、人民币汇率波动\",\n        \"PositiveImpact\": [],\n        \"NegativeImpact\": [\"电子\", \"机械制造\", \"出口贸易\"],\n        \"EventTag\": \"全球\"\n    },\n    {\n        \"EventName\": \"广东省人工智能与机器人产业支持政策\",\n        \"Time\": \"2025/4/3\",\n        \"Introduction\": \"广东省发布12条专项措施，包括创建国家级产业创新中心、设立200亿元专项基金、实施税收优惠和技术攻关补贴，旨在推动人工智能与机器人产业发展。\",\n        \"Highlights\": \"政策落实进度、资金使用效率、企业技术创新成果\",\n        \"PositiveImpact\": [\"人工智能\", \"机器人\", \"科技企业\"],\n        \"NegativeImpact\": [],\n        \"EventTag\": \"政策\"\n    },\n    {\n        \"EventName\": \"我国首部能源法正式施行\",\n        \"Time\": \"2025/4/3\",\n        \"Introduction\": \"我国首部能源法正式施行，明确氢能作为能源属性，确立绿证法律地位，计划2025年新增风电光伏装机约2亿千瓦，推动可再生能源发展和绿色电力应用。\",\n        \"Highlights\": \"绿证交易机制、氢能产业扶持政策、新能源装机进度\",\n        \"PositiveImpact\": [\"风电\", \"光伏\", \"氢能\"],\n        \"NegativeImpact\": [],\n        \"EventTag\": \"政策\"\n    },\n    {\n        \"EventName\": \"A股市场开户数创历史新高\",\n        \"Time\": \"2025/4/3\",\n        \"Introduction\": \"3月新增开户数突破300万户，同比增长26.78%，环比增长96%，散户资金净流入193.1亿元，占成交额2%，显示散户资金加速入场。\",\n        \"Highlights\": \"散户投资偏好变化、市场风格切换、中小盘股波动性\",\n        \"PositiveImpact\": [\"券商\", \"中小盘股\"],\n        \"NegativeImpact\": [\"机构重仓股\"],\n        \"EventTag\": \"行业\"\n    },\n    {\n        \"EventName\": \"科创板年报业绩压力显现\",\n        \"Time\": \"2025/4月\",\n        \"Introduction\": \"2024年科创板盈利增速中位数为-8.3%，营收增速下滑且现金流紧张企业占比达35%，半导体、生物医药等重点领域面临业绩压力。\",\n        \"Highlights\": \"监管政策调整、资金流向变化、企业盈利改善措施\",\n        \"PositiveImpact\": [\"行业龙头\"],\n        \"NegativeImpact\": [\"半导体\", \"生物医药\", \"科创板中小企\"],\n        \"EventTag\": \"行业\"\n    }\n]\n```"},
+    "usage":{"completion_tokens":5172,"prompt_tokens":7809,"enable":true},"cost_time":366312
+}

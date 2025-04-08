@@ -1,139 +1,149 @@
 <template>
   <div class="stock-headlines">
-    <div class="headlines-grid">
-      <div 
-        v-for="(item, index) in headlines" 
-        :key="index"
-        class="headline-card"
-        :class="{'has-negative': item.NegativeImpact.length > 0}"
-      >
-        <!-- 卡片头部 -->
-        <div class="card-header">
-          <div class="event-meta">
-            <div class="event-title-wrapper">
-              <div class="event-icon" :class="getIconClass(item.EventTag)">
-                <i :class="getIconForTag(item.EventTag)"></i>
-              </div>
-              <h3 class="event-title">{{ item.EventName }}</h3>
-            </div>
-            <div class="event-time">
-              <i class="far fa-clock"></i>
-              {{ formatTime(item.Time) }}
-            </div>
-          </div>
-          <div class="event-tag" :class="getTagClass(item.EventTag)">
-            {{ item.EventTag }}
-          </div>
-        </div>
-        
-        <!-- 卡片内容 -->
-        <div class="card-content">
-          <!-- 简介部分 -->
-          <div class="event-intro">
-            <p>{{ item.Introduction }}</p>
-          </div>
-          
-          <!-- 详情部分 -->
-          <div class="event-details">
-            <!-- 看点 -->
-            <div class="detail-row highlights">
-              <div class="row-label">
-                <i class="fas fa-bullseye"></i>
-                <span>看点</span>
-              </div>
-              <div class="row-content">
-                <span v-for="(highlight, idx) in item.Highlights.split('/')" 
-                      :key="idx" 
-                      class="highlight-item">
-                  {{ highlight }}
-                </span>
-              </div>
-            </div>
-            
-            <!-- 影响分析区域 -->
-            <div class="impact-analysis">
-              <!-- 利好影响 -->
-              <div v-if="item.PositiveImpact.length" class="impact-row positive">
-                <div class="impact-label">
-                  <i class="fas fa-arrow-up"></i>
-                  <span>利好</span>
-                </div>
-                <div class="impact-tags">
-                  <div v-for="(tag, idx) in item.PositiveImpact" 
-                       :key="idx" 
-                       class="impact-tag positive">
-                    {{ tag }}
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 利空影响 -->
-              <div v-if="item.NegativeImpact.length" class="impact-row negative">
-                <div class="impact-label">
-                  <i class="fas fa-arrow-down"></i>
-                  <span>利空</span>
-                </div>
-                <div class="impact-tags">
-                  <div v-for="(tag, idx) in item.NegativeImpact" 
-                       :key="idx" 
-                       class="impact-tag negative">
-                    {{ tag }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    
+    <!-- 加载状态显示 - 优化后的版本 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-stage">{{ loadingStageText }}</p>
+      <div v-if="processingTime > 5" class="loading-note">
+        <i class="fas fa-info-circle"></i>
+        <span>AI数据收集处理中，请稍候...</span>
       </div>
+    </div>
+            
+    <!-- 错误提示 -->
+    <div v-if="error && !loading" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>{{ error }}</p>
+    </div>
+              
+    <!-- 轮播内容容器 -->
+    <div class="swiper-container-wrapper">
+      <!-- 轮播内容 -->
+      <swiper 
+        v-if="!loading && !error && headlines.length > 0"
+        :options="swiperOptions"
+        ref="mySwiper" 
+        class="headlines-swiper"
+      >
+        <swiper-slide v-for="(item, index) in headlines" :key="index" class="headline-slide">
+          <HeadlineCard :item="item" />
+        </swiper-slide>
+      </swiper>
+      
+      <!-- 左侧遮罩 -->
+      <div class="swiper-mask left-mask"></div>
+      
+      <!-- 右侧遮罩 -->
+      <div class="swiper-mask right-mask"></div>
+      
+      <!-- 自定义导航按钮 - 添加点击事件 -->
+      <div class="swiper-button-prev custom-nav-btn" 
+           v-if="!loading && !error && headlines.length > 0"
+           @click="slidePrev">
+        <i class="fas fa-chevron-left"></i>
+      </div>
+      <div class="swiper-button-next custom-nav-btn" 
+           v-if="!loading && !error && headlines.length > 0"
+           @click="slideNext">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </div>
+    
+    <!-- 无数据显示 -->
+    <div v-if="!loading && !error && headlines.length === 0" class="no-data">
+      <i class="fas fa-info-circle"></i>
+      <p>暂无市场要闻</p>
     </div>
   </div>
 </template>
 
 <script>
-import '@fortawesome/fontawesome-free/css/all.css'
+import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
+import 'swiper/css/swiper.css';
+import '@fortawesome/fontawesome-free/css/all.css';
+import HeadlineCard from './ui/HeadlineCard.vue';
+import { fetchHeadlinesData, setUseMockData } from '../utils/api.js';
+import { stockHeadlinesMockData } from '../utils/mockData';
 
 export default {
   name: 'StockHeadlines',
   components: {
+    Swiper,
+    SwiperSlide,
+    HeadlineCard
+  },
+  directives: {
+    swiper: directive
   },
   data() {
+    // 从 mockAsyncResponse 中提取初始数据
+    const getMockData = () => {
+      try {
+        const textContent = stockHeadlinesMockData.response.text.trim();
+        // const jsonMatch = textContent.match(/```json\\n([\\s\\S]*)\\n```/); // 这行正则匹配可能不再需要，因为我们直接存储JSON字符串了
+        // const jsonStr = jsonMatch ? jsonMatch[1] : textContent;
+        return JSON.parse(textContent); // 直接解析textContent
+      } catch (e) {
+        console.error('解析模拟数据失败:', e);
+        return [];
+      }
+    };
+
     return {
-      currentTime: new Date().toLocaleTimeString(),
-      headlines: [
-        {
-          "EventName": "全国两会政策落地",
-          "Time": "2025/3/5",
-          "Introduction": "2025年政府工作报告设定GDP增长5%目标，赤字率提升至4%，重点部署科技创新（量子计算、AI产业链）、消费提振（新能源汽车置换补贴）和金融改革（5000亿特别国债注资银行）三大战略方向。这是年度最高规格经济政策风向标，直接决定全年财政资金流向。",
-          "Highlights": "特别国债注资规模超预期/半导体扶持/新能源汽车补贴",
-          "PositiveImpact": ["半导体设备", "新能源汽车", "国有大行"],
-          "NegativeImpact": [],
-          "EventTag": "政策"
+      loading: false,
+      error: null,
+      headlines: getMockData(), // 使用解析后的模拟数据
+      swiperOptions: {
+        slidesPerView: 'auto',
+        spaceBetween: 8, // 减小间距，因为我们已经在slide中添加了padding
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev'
         },
-        {
-          "EventName": "中美贸易摩擦升级",
-          "Time": "2025/3/10",
-          "Introduction": "中国宣布对美国鸡肉（15%）、大豆（10%）加征关税，并限制15家美企对华出口。这是2024年贸易争端以来最大规模反制措施，涉及2024年中美贸易额约380亿美元的农产品和科技产品。",
-          "Highlights": "后续谈判可能性/国内农产品储备投放计划/被制裁美企替代方案",
-          "PositiveImpact": ["农业种植", "食品加工", "国产替代"],
-          "NegativeImpact": ["消费电子代工", "纺织服装", "跨境电商"],
-          "EventTag": "全球"
-        },
-        {
-          "EventName": "央行释放宽松信号",
-          "Time": "2025/3/21",
-          "Introduction": "央行一季度例会明确实施适度宽松货币政策，强调加强逆周期调节，特别提及将综合运用存款准备金率、政策利率等工具。这是继2024年11月降准后，首次释放明确降息预期信号。",
-          "Highlights": "MLF利率调整窗口期/普惠金融定向降准可能性/汇率波动容忍度",
-          "PositiveImpact": ["新基建", "科技成长股", "房地产龙头"],
-          "NegativeImpact": [],
-          "EventTag": "政策"
+        watchOverflow: true,
+        observer: true,
+        observeParents: true,
+        updateOnWindowResize: true,
+        resizeObserver: true,
+        loop: false, // 确保不循环，避免右侧出现重复卡片
+        slidesOffsetBefore: 0,
+        slidesOffsetAfter: 0,
+        breakpoints: {
+          // 当窗口宽度大于等于1600px
+          1600: {
+            slidesPerView: 4,
+            spaceBetween: 8
+          },
+          // 当窗口宽度大于等于1200px
+          1200: {
+            slidesPerView: 3,
+            spaceBetween: 8
+          },
+          // 当窗口宽度大于等于768px
+          768: {
+            slidesPerView: 2,
+            spaceBetween: 8
+          },
+          // 当窗口宽度小于768px
+          320: {
+            slidesPerView: 1,
+            spaceBetween: 8
+          }
         }
-      ]
+      },
+      useMockApi: true,
+      loadingStageText: '正在加载数据...',
+      processingTime: 0,
+      processingTimer: null,
+    };
+  },
+  computed: {
+    swiper() {
+      return this.$refs.mySwiper?.$swiper;
     }
   },
   methods: {
-    formatTime(time) {
-      return time;
-    },
     getBorderClass(tag) {
       const classes = {
         '政策': 'policy-border',
@@ -165,13 +175,112 @@ export default {
         '行业': 'fas fa-industry'
       };
       return icons[tag] || 'fas fa-info';
-    }
+    },
+    // 获取实时头条数据
+    async fetchRealTimeHeadlines() {
+      try {
+        this.loading = true;
+        this.error = null;
+        this.loadingStageText = '正在请求数据...';
+        this.processingTime = 0;
+        
+        // 清除可能存在的旧计时器
+        if (this.processingTimer) {
+          clearInterval(this.processingTimer);
+        }
+        
+        // 启动计时器
+        this.processingTimer = setInterval(() => {
+          this.processingTime++;
+        }, 1000);
+        
+        // 调用API获取头条数据，添加状态回调
+        const query = "stock_headlines";
+        const result = await fetchHeadlinesData(query, ({ stage, message, attempt, total, progress }) => {
+          // 更新加载状态文本
+          this.loadingStageText = message;
+          
+          // 如果是轮询阶段，更新进度信息
+          if (stage === 'POLLING' && total) {
+            this.loadingStageText = `${message} (${attempt}/${total})`;
+          }
+          
+          console.log('加载状态更新:', { stage, message, attempt, total, progress });
+        });
+        
+        // 确保返回的结果是有效数据才更新
+        if (result && Array.isArray(result) && result.length > 0) {
+          // 更新头条数据
+          this.headlines = result;
+          
+          // 更新完数据后，需要更新swiper
+          this.$nextTick(() => {
+            if (this.swiper) {
+              this.swiper.update();
+            }
+          });
+        } else {
+          console.warn('获取到的数据为空或格式不正确');
+          this.error = '获取数据格式不正确';
+        }
+      } catch (error) {
+        console.error('获取实时头条失败:', error);
+        this.error = `获取数据失败: ${error.message}`;
+      } finally {
+        // 清除计时器
+        if (this.processingTimer) {
+          clearInterval(this.processingTimer);
+          this.processingTimer = null;
+        }
+        this.loading = false;
+        this.processingTime = 0;
+      }
+    },
+    
+    // 切换API模式
+    toggleApiMode() {
+      this.useMockApi = !this.useMockApi;
+      console.log('已切换API模式:', this.useMockApi ? '模拟' : '真实');
+      setUseMockData(this.useMockApi);
+    },
+    
+    // 修复swiper右侧滚动问题
+    fixSwiperScrolling() {
+      this.$nextTick(() => {
+        if (this.swiper) {
+          // 获取所有slide和容器宽度
+          // 移除未使用的变量
+          // const slides = this.swiper.slides;
+          
+          // 如果滑块已经到达最后，强制修正位置
+          if (this.swiper.isEnd) {
+            this.swiper.translateTo(this.swiper.maxTranslate());
+          }
+          
+          // 更新swiper以应用新的设置
+          this.swiper.update();
+          
+          console.log('修复了swiper滚动问题');
+        }
+      });
+    },
+    
+    // 添加手动滚动方法
+    slidePrev() {
+      if (this.swiper) {
+        this.swiper.slidePrev();
+      }
+    },
+    
+    slideNext() {
+      if (this.swiper) {
+        this.swiper.slideNext();
+      }
+    },
   },
   mounted() {
-    // 定时更新时间
-    setInterval(() => {
-      this.currentTime = new Date().toLocaleTimeString();
-    }, 60000);
+    // 使用预设ID获取初始数据
+    this.fetchRealTimeHeadlines();
     
     // 增强可访问性
     this.$nextTick(() => {
@@ -182,413 +291,254 @@ export default {
         card.setAttribute('aria-label', '市场事件');
       });
     });
-  }
+
+    // 如果需要在mounted后执行一些操作
+    this.$nextTick(() => {
+      // 如需更新swiper
+      if (this.swiper) {
+        this.swiper.update();
+      }
+    });
+
+    // 在swiper初始化后修复滚动问题
+    this.$nextTick(() => {
+      if (this.swiper) {
+        // 监听滑动事件，以便在滑动到最后时修复位置
+        this.swiper.on('slideChange', () => {
+          if (this.swiper.isEnd) {
+            // 如果滑到最后，确保没有额外空间
+            this.swiper.translateTo(this.swiper.maxTranslate());
+          }
+        });
+        
+        // 初始化后修复一次
+        this.fixSwiperScrolling();
+      }
+    });
+  },
+  beforeUnmount() {
+    // 在swiper初始化后修复滚动问题
+    this.$nextTick(() => {
+      if (this.swiper) {
+        // 监听滑动事件，以便在滑动到最后时修复位置
+        this.swiper.on('slideChange', () => {
+          if (this.swiper.isEnd) {
+            // 如果滑到最后，确保没有额外空间
+            this.swiper.translateTo(this.swiper.maxTranslate());
+          }
+        });
+        
+        // 初始化后修复一次
+        this.fixSwiperScrolling();
+      }
+    });
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .stock-headlines {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--hx-comp-margin-m);
+  max-width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden; // 防止水平溢出
   
   .headlines-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--hx-size-4);
-    padding-bottom: var(--hx-size-2);
-    border-bottom: 1px solid var(--hx-border-level-1-color);
+    margin-bottom: 16px;
     
-    .header-left {
-      .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin: 0 0 4px 0;
-        color: var(--hx-text-color-primary);
-        background: linear-gradient(to right, var(--hx-brand-color-3), var(--hx-sec-brand-color-3));
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      
-      .subtitle {
-        font-size: 13px;
-        color: var(--hx-text-color-secondary);
-      }
-    }
-    
-    .header-right {
-      .refresh-status {
-        display: flex;
-        align-items: center;
-        
-        .pulse-dot {
-          width: 8px;
-          height: 8px;
-          background-color: var(--hx-success-color-3);
-          border-radius: 50%;
-          margin-right: 8px;
-          position: relative;
-          
-          &:before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background-color: var(--hx-success-color-3);
-            border-radius: 50%;
-            opacity: 0.6;
-            animation: pulse 2s infinite;
-          }
-        }
-        
-        .time {
-          font-size: 13px;
-          color: var(--hx-text-color-secondary);
-        }
-      }
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--hx-text-color-primary);
     }
   }
   
-  .headlines-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--hx-size-4);
-  }
-  
-  .headline-card {
+  // 轮播容器包装器
+  .swiper-container-wrapper {
     position: relative;
-    background-color: var(--hx-bg-color-container);
-    border-radius: var(--hx-radius-default);
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.25s ease;
+  }
+  
+  // 遮罩样式
+  .swiper-mask {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 60px; // 遮罩宽度
+    z-index: 10;
+    pointer-events: none; // 允许点击穿透
+    
+    &.left-mask {
+      left: 0;
+      background: linear-gradient(to right, var(--hx-bg-color-page) 30%,var(--hx-bg-color-page) 70%, transparent);
+    }
+    
+    &.right-mask {
+      right: 0;
+      width: 70px; // 增加右侧遮罩宽度
+      background: linear-gradient(to left, var(--hx-bg-color-page) 40%, var(--hx-bg-color-page) 80%, transparent);
+    }
+  }
+  
+  .headlines-swiper {
+    padding: 0 60px; // 增加左右padding，给按钮和卡片留出更多空间
+    width: 100%; // 确保swiper容器宽度为100%
+    box-sizing: border-box; // 确保padding计算在宽度内
+    
+    .headline-slide {
+      height: auto;
+      width: 360px; // 设置默认宽度，但会被slidesPerView自动调整
+      padding: 0 8px; // 为每个slide添加内边距，确保卡片间有间隔
+      box-sizing: border-box;
+      display: flex; // 使用flex布局
+      justify-content: center; // 内容居中
+      align-items: center; // 内容垂直居中
+      
+      @media (max-width: 768px) {
+        width: 100%;
+      }
+    }
+    
+    .swiper-wrapper {
+      // 修复swiper计算问题，确保对齐
+      display: flex;
+      align-items: stretch;
+      will-change: transform;
+      box-sizing: content-box;
+    }
+  }
+  
+  // 导航按钮样式
+  .custom-nav-btn {
+    position: absolute; // 确保绝对定位
+    top: 50%; // 垂直居中
+    transform: translateY(-50%); // 垂直居中调整
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--hx-text-color-brand); // 使用品牌色作为按钮背景色
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); // 添加阴影增强视觉效果
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30; // 提高z-index，确保在遮罩上方
+    margin: 0;
+    
+    &.swiper-button-prev {
+      left: 15px; // 调整左按钮位置
+    }
+    
+    &.swiper-button-next {
+      right: 15px; // 调整右按钮位置
+    }
+    
+    &:after {
+      display: none; // 移除默认箭头
+    }
+    
+    i {
+      color: var(--hx-text-color-primary); // 白色图标，与品牌色背景形成对比
+      font-size: 14px;
+      font-weight: bold; // 加粗图标
+    }
     
     &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      background-color: var(--hx-bg-color-specialcomponent);
+      background: var(--hx-bg-color-specialcomponent);
     }
     
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 2px var(--hx-brand-color-3), 0 4px 16px rgba(0, 0, 0, 0.15);
-    }
-    
-    .card-accent {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(to bottom, var(--hx-brand-color-3), var(--hx-sec-brand-color-3), var(--hx-warning-color-3));
-    }
-    
-    .card-header {
-      padding: var(--hx-size-4) var(--hx-size-4) var(--hx-size-2);
-      display: flex;
-      justify-content: space-between;
-      position: relative;
-      z-index: 1;
+    &.swiper-button-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      background: var(--hx-bg-color-page); // 禁用状态使用不同背景色
       
-      &:after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 1px;
-        background: var(--hx-border-level-1-color);
+      i {
+        color: var(--hx-text-color-secondary); // 禁用状态使用次要文字颜色
       }
-      
-      .event-meta {
-        flex: 1;
-        
-        .event-title-wrapper {
-          display: flex;
-          align-items: center;
-          margin-bottom: 6px;
-          
-          .event-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-            
-            i {
-              font-size: 12px;
-            }
-            
-            &.policy-icon {
-              background-color: rgba(var(--hx-brand-color-rgb), 0.1);
-              color: var(--hx-brand-color-3);
-            }
-            
-            &.global-icon {
-              background-color: rgba(var(--hx-sec-brand-color-rgb), 0.1);
-              color: var(--hx-sec-brand-color-3);
-            }
-            
-            &.industry-icon {
-              background-color: rgba(var(--hx-warning-color-rgb), 0.1);
-              color: var(--hx-warning-color-3);
-            }
-          }
-          
-          .event-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--hx-text-color-primary);
-            margin: 0;
-            line-height: 1.3;
-          }
-        }
-        
-        .event-time {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          margin-left: 32px;
-          color: var(--hx-text-color-tertiary);
-          font: var(--hx-font-body-small);
+    }
+  }
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+  .stock-headlines {
+    .custom-nav-btn {
+      width: 28px;
+      height: 28px;
           
           i {
             font-size: 12px;
           }
         }
       }
-      
-      .event-tag {
-        font-size: 11px;
-        font-weight: normal;
-        padding: 0px 4px;
-        border-radius: 2px;
-        white-space: nowrap;
-        flex-shrink: 0;
-        
-        &.policy-tag {
-          background-color: rgba(var(--hx-brand-color-rgb), 0.1);
-          color: var(--hx-brand-color-3);
-        }
-        
-        &.global-tag {
-          background-color: rgba(var(--hx-sec-brand-color-rgb), 0.1);
-          color: var(--hx-sec-brand-color-3);
-        }
-        
-        &.industry-tag {
-          background-color: rgba(var(--hx-warning-color-rgb), 0.1);
-          color: var(--hx-warning-color-3);
-        }
-      }
-    }
-    
-    .card-content {
-      padding: var(--hx-size-2) var(--hx-size-4) var(--hx-size-4);
+}
+
+.loading-container {
+  width: 100%;
+  height: 200px;
       display: flex;
       flex-direction: column;
-      
-      .event-intro {
-        margin-bottom: var(--hx-size-3);
-        position: relative;
-        
-        p {
-          font-size: 13px;
+  align-items: center;
+  justify-content: center;
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--hx-text-color-brand);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 16px;
+  }
+  
+  p {
           color: var(--hx-text-color-secondary);
-          line-height: 1.5;
-          margin: 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          position: relative;
-          transition: all 0.3s ease;
-        }
-        
-        &:hover {
-          p {
-            -webkit-line-clamp: unset;
-            line-clamp: unset;
-            z-index: 10;
-          }
-          
-          &:after {
-            opacity: 1;
-          }
-        }
-        
-        &:after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          right: 0;
-          background-color: var(--hx-text-color-tertiary);
-          color: var(--hx-text-color-primary);
-          font-size: 10px;
-          padding: 1px 4px;
-          border-radius: 2px;
-          opacity: 0;
-          transition: opacity 0.2s ease;
-        }
-      }
-      
-      .event-details {
-        
-        .detail-row {
-          display: flex;
-          margin-bottom: 8px;
-          
-          .row-label {
-            display: flex;
-            align-items: center;
-            margin-right: 8px;
-            color: var(--hx-text-color-emphasize);
-            font-size: 12px;
-            min-width: 36px;
-            
-            .icon-target {
-              margin-right: 4px;
-            }
-          }
-          
-          .row-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            
-            .highlight-item {
-              background-color: rgba(0, 0, 0, 0.2);
-              padding: 2px 4px;
-              border-radius: 2px;
-              font-size: 11px;
-              color: var(--hx-text-color-secondary);
-              white-space: nowrap;
-            }
-          }
-        }
-        
-        .impact-analysis {
+    font-size: 14px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+.error-message {
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+  color: var(--hx-text-color-danger);
+  
+  i {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    font-size: 14px;
+  }
+}
+
+.no-data {
+  width: 100%;
+  height: 200px;
           display: flex;
           flex-direction: column;
-          gap: 6px;
-          
-          .impact-row {
-            display: flex;
-            align-items: flex-start;
-            
-            .impact-label {
-              display: flex;
               align-items: center;
-              font-size: 12px;
-              min-width: 28px;
-              margin-right: 8px;
-              
-              i {
-                margin-right: 4px;
-              }
-              
-              span {
-                white-space: nowrap;
-              }
-            }
-            
-            &.positive .impact-label {
-              color: var(--hx-raise-color-2);
-            }
-            
-            &.negative .impact-label {
-              color: var(--hx-fall-color-2);
-            }
-            
-            .impact-tags {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 4px;
-              
-              .impact-tag {
-                padding: 0px 4px;
-                border-radius: 2px;
-                font-size: 11px;
-                white-space: nowrap;
-                
-                &.positive {
-                  background-color: rgba(239, 68, 68, 0.1);
-                  color: var(--hx-raise-color-2);
-                }
-                
-                &.negative {
-                  background-color: rgba(16, 185, 129, 0.1);
-                  color: var(--hx-fall-color-2);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  justify-content: center;
+  color: var(--hx-text-color-secondary);
+  
+  i {
+    font-size: 32px;
+    margin-bottom: 16px;
   }
   
-  @keyframes pulse {
-    0% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 0; }
-  }
-  
-  @media (max-width: 1200px) {
-    .headlines-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  
-  @media (max-width: 992px) {
-    .headlines-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .headlines-header {
-      flex-direction: column;
-      align-items: flex-start;
-      
-      .header-right {
-        margin-top: 8px;
-      }
-    }
-    
-    .headlines-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .headline-card {
-      .card-header {
-        .event-meta {
-          .event-title-wrapper {
-            .event-title {
+  p {
               font-size: 14px;
-            }
-          }
-        }
-      }
-      
-      .card-content {
-        .event-intro {
-          p {
-            font-size: 12px;
-          }
-        }
-      }
-    }
   }
 }
 </style> 
