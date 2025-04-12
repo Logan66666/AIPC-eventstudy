@@ -2,8 +2,8 @@
   <div class="company-news card">
     <div class="industry-header">
       <div class="header-main">
-        <h2 class="card-title secondary-title">公司动向</h2>
-        <div class="card-subtitle">自选股动态</div>
+        <h2 class="card-title secondary-title">热股动向</h2>
+        <div class="card-subtitle">热门股票最新事件跟踪</div>
       </div>
     </div>
     
@@ -24,6 +24,7 @@
     <div class="timeline-content">
       <DataTimeline 
         :items="currentTypeItems"
+        :expanded-item="expandedItem"
         @item-expanded="handleItemExpanded"
       >
         <template v-slot:item-tag="{ item }">
@@ -77,6 +78,7 @@ export default {
   data() {
     return {
       currentType: 'performance',
+      expandedItem: null,
       timeTagTypeMap: {
         '短期': 'time-short',
         '中期': 'time-mid',
@@ -283,9 +285,10 @@ export default {
   methods: {
     switchType(code) {
       this.currentType = code
+      this.expandedItem = null
     },
-    handleItemExpanded() {
-      // 空方法，保留以便接收事件
+    handleItemExpanded(data) {
+      this.expandedItem = data.expanded ? data.index : null
     }
   }
 }

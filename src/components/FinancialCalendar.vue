@@ -18,6 +18,12 @@
     </div>
     
     <div class="calendar-content">
+      <!-- 加载状态 -->
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">加载财经数据中...</div>
+      </div>
+      
       <FullCalendar 
         ref="fullCalendar"
         :options="calendarOptions"
@@ -43,6 +49,8 @@ import FullCalendar from '@fullcalendar/vue'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import DropdownSelect from './ui/DropdownSelect.vue'
+import axios from 'axios'
+import { financialCalendarMockData } from '../utils/mockData'
 
 export default {
   name: 'FinancialCalendar',
@@ -51,13 +59,10 @@ export default {
     DropdownSelect
   },
   data() {
-    // 获取当前日期
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    
     return {
       currentDate: new Date(),
+      currentViewStartDate: null,
+      currentViewEndDate: null,
       selectedEvent: null,
       popupPosition: {
         top: '50px',
@@ -72,10 +77,9 @@ export default {
           right: 'next'
         },
         locale: 'zh-cn',
-        firstDay: 0, // 将周日设为一周的第一天
-        dayMaxEvents: 3, // 每天最多显示的事件数
+        firstDay: 0,
+        dayMaxEvents: 5,
         height: 'auto',
-        eventClick: this.handleEventClick,
         eventDisplay: 'block',
         eventTimeFormat: {
           hour: '2-digit',
@@ -85,313 +89,42 @@ export default {
         },
         dayHeaderFormat: { weekday: 'short' },
         events: [],
-        // 给表格添加类，以便更好控制样式
+        datesSet: this.handleDatesSet,
         viewClassNames: 'fc-custom-view',
         dayHeaderClassNames: 'fc-custom-header',
         dayCellClassNames: 'fc-custom-cell',
-        // 头部工具栏类
-        headerToolbarOptions: {
-          classNames: 'fc-custom-toolbar'
-        },
-        // 移除默认边框
-        borderColor: 'transparent',
-        // 完全控制表格背景
-        slotLabelClassNames: 'fc-custom-slot-label',
-        dayCellDidMount: function(info) {
-          if (info.isToday) {
-            info.el.classList.add('custom-today-cell');
-            // 只设置背景色，不添加装饰
-            info.el.style.backgroundColor = 'rgba(var(--hx-brand-color-rgb, 59, 130, 246), 0.08)';
-          } else {
-            // 强制设置背景色
-            info.el.style.backgroundColor = 'var(--hx-bg-color-container)';
+        eventOrder: (a, b) => {
+          // 首先按类别排序（行业排在前面）
+          if (a.extendedProps.category !== b.extendedProps.category) {
+            return a.extendedProps.category === '行业' ? -1 : 1;
           }
+          // 其次按时间排序
+          return new Date(a.start) - new Date(b.start);
         },
-        // 添加视图挂载事件处理
-        viewDidMount: function(arg) {
-          // 设置视图背景
-          arg.el.style.backgroundColor = 'var(--hx-bg-color-container)';
-          
-          // 强制设置表头背景色
-          const headers = arg.el.querySelectorAll('.fc-col-header, .fc-col-header-cell');
-          headers.forEach(header => {
-            header.style.backgroundColor = 'var(--hx-bg-color-specialcomponent)';
-          });
-          
-          // 修复表体背景
-          const bodyCells = arg.el.querySelectorAll('.fc-daygrid-body, .fc-scrollgrid, .fc-scrollgrid-section');
-          bodyCells.forEach(cell => {
-            cell.style.backgroundColor = 'var(--hx-bg-color-container)';
-          });
-        }
+        moreLinkClick: 'popover',
+        eventDidMount: this.handleEventMount,
+        viewDidMount: this.handleViewMount,
+        eventClick: this.handleEventClick
       },
-      rawEvents: [
-        // 4月份数据
-        {
-          date: new Date(currentYear, currentMonth, 1),
-          title: '中国制造业PMI数据',
-          description: '预期51.2，前值50.8，关注制造业景气度变化',
-          importance: 3, // 高重要性
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 1),
-          title: '美国ISM制造业指数',
-          description: '预期48.5，前值47.8，关注制造业回暖情况',
-          importance: 3,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 2),
-          title: '日本央行会议纪要',
-          description: '关注货币政策变化信号，通胀预期调整',
-          importance: 2, // 中等重要性
-          category: '政策'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 3),
-          title: '韩国CPI数据',
-          description: '预期同比增长2.2%，关注通胀趋势',
-          importance: 1, // 低重要性
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 4),
-          title: '德国工业产出数据',
-          description: '预期环比增长0.3%，关注经济复苏势头',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 5),
-          title: '美国非农就业数据',
-          description: '预期新增就业18.5万，前值27.5万，关注就业市场变化',
-          importance: 3,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 8),
-          title: '中国贸易数据',
-          description: '预期出口同比增长7.5%，进口增长5.2%',
-          importance: 2,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 9),
-          title: '法国工业信心调查',
-          description: '预期指数101.5，前值100.2，关注企业信心变化',
-          importance: 1,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 10),
-          title: '美国CPI数据',
-          description: '预期同比3.4%，前值3.2%，通胀是否重新抬头',
-          importance: 3,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 10),
-          title: '美国原油库存数据',
-          description: '预期减少100万桶，前值增加400万桶',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 11),
-          title: '欧洲央行利率决议',
-          description: '预期维持利率不变，关注降息前瞻指引',
-          importance: 3,
-          category: '政策'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 12),
-          title: '英国GDP数据',
-          description: '预期季度增长0.2%，关注经济增长动力',
-          importance: 3,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 15),
-          title: '中国GDP一季度数据',
-          description: '预期同比增长5.2%，关注经济复苏情况',
-          importance: 3,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 15),
-          title: '中国零售销售数据',
-          description: '预期同比增长5.5%，关注消费复苏情况',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 16),
-          title: '日本贸易数据',
-          description: '预期出口增长7.8%，进口增长2.3%',
-          importance: 2,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 17),
-          title: '欧元区CPI终值',
-          description: '预期同比2.4%，核心CPI 2.9%',
-          importance: 2,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 18),
-          title: '腾讯控股财报',
-          description: '2023年Q4及全年业绩，关注增长情况',
-          importance: 2,
-          category: '公司'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 18),
-          title: '欧元区消费者信心初值',
-          description: '预期指数-15.0，前值-15.5',
-          importance: 1,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 19),
-          title: '德国PPI数据',
-          description: '预期同比-2.8%，前值-3.1%',
-          importance: 1,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 20),
-          title: '特斯拉财报',
-          description: '2024年Q1财报，关注销量和利润',
-          importance: 2,
-          category: '公司'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 20),
-          title: '加拿大零售销售数据',
-          description: '预期环比增长0.3%，前值0.1%',
-          importance: 1,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 22),
-          title: '美国服务业PMI初值',
-          description: '预期53.0，前值52.3，关注服务业景气度',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 22),
-          title: '欧元区服务业PMI初值',
-          description: '预期52.5，前值51.5，关注经济活动情况',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 23),
-          title: '英国服务业PMI初值',
-          description: '预期52.8，前值52.9，关注经济走势',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 24),
-          title: '美国耐用品订单',
-          description: '预期环比增长0.5%，前值1.2%',
-          importance: 2,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 25),
-          title: '微软财报',
-          description: '2024年Q1财报，关注AI业务增长',
-          importance: 2,
-          category: '公司'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 25),
-          title: '谷歌财报',
-          description: '2024年Q1财报，关注广告业务和云服务',
-          importance: 2,
-          category: '公司'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 26),
-          title: '美国GDP初值',
-          description: '预期年化季环比2.0%，前值3.4%',
-          importance: 3,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 26),
-          title: '苹果财报',
-          description: '2024年Q2财报，关注iPhone销量和服务业务',
-          importance: 3,
-          category: '公司'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 28),
-          title: '美国PCE物价指数',
-          description: '美联储首选通胀指标，关注通胀走势',
-          importance: 3,
-          category: '政策'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 29),
-          title: '中国官方PMI数据',
-          description: '预期制造业PMI 51.5，服务业PMI 52.0',
-          importance: 3,
-          category: '行业'
-        },
-        {
-          date: new Date(currentYear, currentMonth, 30),
-          title: '欧元区GDP初值',
-          description: '预期季度增长0.1%，同比增长0.4%',
-          importance: 3,
-          category: '全球'
-        },
-        // 为当日特别添加数据
-        {
-          date: new Date(currentYear, currentMonth, currentDate.getDate()),
-          title: '今日特别数据',
-          description: '这是针对今天特别添加的数据，会随日期变化',
-          importance: 3,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, currentDate.getDate()),
-          title: '今日市场焦点',
-          description: '当前市场关注的热点事件和数据',
-          importance: 2,
-          category: '全球'
-        },
-        {
-          date: new Date(currentYear, currentMonth, currentDate.getDate()),
-          title: '今日政策动向',
-          description: '重要经济政策和监管变化',
-          importance: 2,
-          category: '政策'
-        }
-      ],
-      selectedCategories: [], // 已选类别
+      rawEvents: [],
+      selectedCategories: [],
+      isLoading: false,
+      loadError: null
     }
   },
   computed: {
-    // 增加类别选项计算属性
+    // 修改类别选项
     categoryOptions() {
       return [
-        { label: '全球', value: '全球', badgeClass: 'global' },
-        { label: '政策', value: '政策', badgeClass: 'policy' },
-        { label: '行业', value: '行业', badgeClass: 'industry' },
-        { label: '公司', value: '公司', badgeClass: 'company' }
+        { label: '财经', value: '财经', badgeClass: 'global' },
+        { label: '行业', value: '行业', badgeClass: 'industry' }
       ];
     },
     
     // 根据选中类别过滤事件
     filteredEvents() {
       if (this.selectedCategories.length === 0) {
-        return this.rawEvents; // 未选择时显示所有事件
+        return this.rawEvents;
       }
       
       return this.rawEvents.filter(event => 
@@ -411,89 +144,250 @@ export default {
   created() {
     // 初始化选择所有类别
     this.selectedCategories = this.categoryOptions.map(option => option.value);
+    
+    // 获取财经日历数据
+    this.fetchCalendarData();
   },
   mounted() {
-    this.initCalendar();
-    
-    // 延迟执行，等待日历渲染完成
-    setTimeout(() => {
-      this.fixHeaderBorder();
-      this.adjustEmptyRows();
-      this.fixBorderGaps();
-      this.fixCalendarBackground(); // 添加新方法
-    }, 100);
+    // 确保日历初始化在DOM加载后执行
+    this.$nextTick(() => {
+      this.initCalendar();
+      
+      // 延迟执行，等待日历渲染完成
+      setTimeout(() => {
+        this.fixHeaderBorder();
+        this.adjustEmptyRows();
+        this.fixBorderGaps();
+        this.fixCalendarBackground();
+      }, 100);
+    });
   },
   methods: {
+    // 初始化日历
     initCalendar() {
-      this.initCalendarWithEvents(this.filteredEvents);
+      if (!this.$refs.fullCalendar) return;
+      
+      // 获取今天的日期
+      const today = new Date();
+      
+      // 设置日历视图为当前月
+      const calendarApi = this.$refs.fullCalendar.getApi();
+      if (calendarApi) {
+        calendarApi.gotoDate(today);
+      }
     },
-    initCalendarWithEvents(eventsToShow) {
-      // 将事件数据转换为FullCalendar格式
-      const events = eventsToShow.map(event => {
-        // 根据类别设置左侧边框颜色，而不是根据重要性
-        let borderColor, textColor = 'var(--hx-text-color-primary)';
-        
-        // 根据事件类别设置颜色
-        switch(event.category) {
-          case '全球':
-            borderColor = 'var(--hx-brand-color-3)'; // 蓝色
-            break;
-          case '政策':
-            borderColor = 'var(--hx-warning-color-3)'; // 黄色
-            break;
-          case '行业':
-            borderColor = 'var(--hx-sec-brand-color-3)'; // 红色
-            break;
-          case '公司':
-            borderColor = 'var(--hx-success-color-3)'; // 绿色
-            break;
-          default:
-            borderColor = 'var(--hx-gray-color-6)';
+    
+    // 处理日期变化
+    handleDatesSet(arg) {
+      // 保存当前视图的日期范围
+      this.currentViewStartDate = arg.start;
+      this.currentViewEndDate = arg.end;
+    },
+    
+    // 处理事件挂载
+    handleEventMount(info) {
+      if (info.event.extendedProps.category === '行业') {
+        const container = info.el.closest('.fc-daygrid-day-events, .fc-popover-body');
+        if (container && !container.dataset.industryEventsProcessed) {
+          // 收集容器中所有行业事件
+          const industryEvents = Array.from(container.querySelectorAll('.fc-event'))
+            .filter(el => {
+              const eventId = el.getAttribute('data-event-id');
+              const event = info.view.calendar.getEventById(eventId);
+              return event && event.extendedProps.category === '行业';
+            });
+          
+          // 如果有超过一个行业事件，按顺序移到容器顶部
+          if (industryEvents.length > 0) {
+            // 逆序处理，确保顺序正确
+            for (let i = industryEvents.length - 1; i >= 0; i--) {
+              container.insertBefore(industryEvents[i], container.firstChild);
+            }
+          }
+          
+          // 标记容器已处理过行业事件排序
+          container.dataset.industryEventsProcessed = 'true';
         }
+      }
+    },
+
+    // 处理视图挂载
+    handleViewMount(arg) {
+      arg.el.style.backgroundColor = 'var(--hx-bg-color-container)';
+      const headers = arg.el.querySelectorAll('.fc-col-header, .fc-col-header-cell');
+      headers.forEach(header => {
+        header.style.backgroundColor = 'var(--hx-bg-color-specialcomponent)';
+      });
+      const bodyCells = arg.el.querySelectorAll('.fc-daygrid-body, .fc-scrollgrid, .fc-scrollgrid-section');
+      bodyCells.forEach(cell => {
+        cell.style.backgroundColor = 'var(--hx-bg-color-container)';
+      });
+    },
+
+    // 获取事件的唯一标识
+    getEventKey(event) {
+      // 只使用日期的年月日部分
+      const dateStr = event.date.toISOString().split('T')[0];
+      return `${dateStr}_${event.title}_${event.category}`;
+    },
+
+    // 处理API返回的事件数据
+    processApiEvents(eventData) {
+      if (!Array.isArray(eventData) || eventData.length === 0) return [];
+
+      // 使用 Map 存储事件，确保唯一性
+      const eventMap = new Map();
+
+      // 处理行业事件
+      eventData.forEach(item => {
+        const date = new Date(item.date);
+        // 规范化日期，只保留年月日
+        date.setHours(0, 0, 0, 0);
         
-        // 格式化日期
-        const year = event.date.getFullYear();
-        const month = String(event.date.getMonth() + 1).padStart(2, '0');
-        const day = String(event.date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
+        const event = {
+          date,
+          title: item.title,
+          description: item.title,
+          importance: 2,
+          category: '行业',
+          blockName: item.blocks?.[0]?.name || '行业'
+        };
         
-        // 在标题前添加类别标识
-        const displayTitle = `${event.category} | ${event.title}`;
+        const key = this.getEventKey(event);
+        if (!eventMap.has(key)) {
+          eventMap.set(key, event);
+        }
+      });
+
+      // 处理财经事件
+      if (financialCalendarMockData.data?.data) {
+        financialCalendarMockData.data.data.forEach(dayData => {
+          if (dayData.eventModelList) {
+            dayData.eventModelList.forEach(event => {
+              const date = new Date(event.date);
+              // 规范化日期，只保留年月日
+              date.setHours(0, 0, 0, 0);
+              
+              const financialEvent = {
+                date,
+                title: event.event,
+                description: `${event.event} (预期值: ${event.qz || '-'}, 前值: ${event.ycz || '-'})`,
+                importance: parseInt(event.importanceEn) || 2,
+                category: '财经',
+                time: event.time
+              };
+              
+              const key = this.getEventKey(financialEvent);
+              if (!eventMap.has(key)) {
+                eventMap.set(key, financialEvent);
+              }
+            });
+          }
+        });
+      }
+
+      // 转换为数组并按日期和标题排序
+      return Array.from(eventMap.values()).sort((a, b) => {
+        // 首先按日期排序
+        const dateCompare = a.date.getTime() - b.date.getTime();
+        if (dateCompare !== 0) return dateCompare;
         
-        return {
-          title: displayTitle,
-          start: dateStr,
+        // 如果日期相同，按标题排序
+        return a.title.localeCompare(b.title);
+      });
+    },
+
+    // 转换事件为日历格式
+    formatEventForCalendar(event) {
+      const displayTitle = event.category === '行业'
+        ? `${event.blockName} | ${event.title}`
+        : `${event.category} | ${event.title}`;
+        
+      // 创建唯一ID
+      const dateStr = event.date.toISOString().split('T')[0];
+      const eventId = `${dateStr}_${event.category}_${event.title}`.replace(/\s+/g, '_');
+
+      return {
+        id: eventId, // 添加唯一ID
+        title: displayTitle,
+        start: event.date.toISOString().split('T')[0],
+        description: event.description,
+        category: event.category,
+        importance: event.importance,
+        backgroundColor: 'transparent',
+        borderColor: event.category === '行业' 
+          ? 'var(--hx-sec-brand-color-3)' 
+          : 'var(--hx-brand-color-3)',
+        textColor: 'var(--hx-text-color-primary)',
+        extendedProps: {
           description: event.description,
           category: event.category,
           importance: event.importance,
-          backgroundColor: 'transparent',
-          borderColor: borderColor,
-          textColor: textColor,
-          extendedProps: {
-            description: event.description,
-            category: event.category,
-            importance: event.importance,
-            originalTitle: event.title
-          }
-        };
-      });
+          originalTitle: event.title,
+          blockName: event.blockName
+        },
+        classNames: [`event-category-${event.category.toLowerCase()}`]
+      };
+    },
+
+    // 更新日历事件
+    updateCalendarEvents() {
+      const events = this.filteredEvents.map(this.formatEventForCalendar);
       
-      // 更新日历事件
       if (this.$refs.fullCalendar) {
         const calendarApi = this.$refs.fullCalendar.getApi();
+        
+        // 先清除所有容器的处理标记
+        const containers = this.$refs.fullCalendar.$el.querySelectorAll('.fc-daygrid-day-events, .fc-popover-body');
+        containers.forEach(container => {
+          delete container.dataset.industryEventsProcessed;
+        });
+        
+        // 确保在添加新事件前先清除旧事件
+        calendarApi.getEventSources().forEach(source => source.remove());
         calendarApi.removeAllEvents();
-        calendarApi.addEventSource(events);
+        
+        // 添加新事件
+        calendarApi.addEventSource({
+          events: events,
+          id: 'mainEventSource'
+        });
       } else {
         this.calendarOptions.events = events;
       }
     },
+
+    // 获取财经日历数据
+    async fetchCalendarData() {
+      this.isLoading = true;
+      try {
+        const response = await axios.get('http://zx.10jqka.com.cn/hotblock/calendar/get', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          timeout: 10000
+        });
+
+        if (response.data?.errorcode === 0 && response.data.result) {
+          this.rawEvents = this.processApiEvents(response.data.result);
+          this.updateCalendarEvents();
+        }
+      } catch (error) {
+        this.loadError = error.message;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     handleEventClick(info) {
       // 获取事件详情
       this.selectedEvent = {
         title: info.event.extendedProps.originalTitle,
         description: info.event.extendedProps.description,
         category: info.event.extendedProps.category,
-        importance: info.event.extendedProps.importance
+        importance: info.event.extendedProps.importance,
+        blockName: info.event.extendedProps.blockName // 保存行业板块名称
       };
       
       // 获取事件元素位置与窗口位置信息
@@ -619,10 +513,6 @@ export default {
         });
       }
     },
-    updateCalendarEvents() {
-      // 调用初始化日历方法，使用过滤后的事件
-      this.initCalendarWithEvents(this.filteredEvents);
-    },
     // 添加一个新方法专门处理背景色问题
     fixCalendarBackground() {
       if (!this.$refs.fullCalendar) return;
@@ -679,7 +569,7 @@ export default {
           viewHarness.appendChild(overlay);
         }
       }
-    }
+    },
   }
 }
 </script>
@@ -739,6 +629,61 @@ export default {
     overflow: hidden;
     position: relative;
     background-color: var(--hx-bg-color-container);
+    
+    /* 加载状态与错误信息样式 */
+    .loading-overlay, .error-message {
+      position: absolute;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.8);
+    }
+    
+    .loading-overlay {
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      flex-direction: column;
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(59,130,246,0.2);
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 10px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    }
+    
+    .error-message {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      flex-direction: column;
+      background: white;
+      border: 1px solid #f56c6c;
+      border-radius: 6px;
+      padding: 16px;
+      width: 280px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      
+      .retry-button {
+        margin-top: 10px;
+        background: #f56c6c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    }
   }
   
   /* 自定义FullCalendar样式 */
@@ -933,8 +878,16 @@ export default {
     
     /* 事件显示样式 */
     .fc-daygrid-day-events {
-      padding: 0 2px;
-      margin-top: 2px;
+      padding: 0 3px !important; 
+      margin-top: 3px !important;
+      margin-bottom: 3px !important;
+    }
+    
+    /* 事件本身的样式 */
+    :deep(.fc-event) {
+      margin-bottom: 4px !important;
+      padding: 3px 4px !important;
+      line-height: 1.4 !important;
     }
     
     .fc-event {
@@ -962,11 +915,26 @@ export default {
       }
       
       .fc-event-title {
-        white-space: nowrap;
+        white-space: normal; /* 允许换行 */
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: normal;
-        padding: 0;
+        padding: 1px 0;
+        /* 限制为最多两行 */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        max-height: 2.8em; /* 增加行高 */
+      }
+      
+      // 修改财经事件的装饰条颜色
+      &[data-category="财经"] {
+        border-left-color: var(--hx-brand-color-3) !important;
+      }
+      
+      // 修改行业事件的装饰条颜色
+      &[data-category="行业"] {
+        border-left-color: var(--hx-sec-brand-color-3) !important;
       }
     }
     
@@ -1055,6 +1023,7 @@ export default {
       background-color: var(--hx-bg-color-container);
       border: 1px solid var(--hx-border-level-1-color);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 1 !important;
       
       .fc-popover-header {
         background-color: var(--hx-bg-color-specialcomponent);
@@ -1062,15 +1031,18 @@ export default {
         padding: 6px 8px;
         font-size: 12px;
         border-bottom: 1px solid var(--hx-border-level-1-color);
+        opacity: 1 !important;
         
         .fc-popover-title {
           color: var(--hx-text-color-primary);
           font-weight: 500;
+          opacity: 1 !important;
         }
         
         .fc-popover-close {
           color: var(--hx-text-color-tertiary);
           font-size: 14px;
+          opacity: 1 !important;
           
           &:hover {
             color: var(--hx-text-color-primary);
@@ -1079,20 +1051,16 @@ export default {
       }
       
       .fc-popover-body {
-        padding: 6px;
+        padding: 8px;
         background-color: var(--hx-bg-color-container);
+        opacity: 1 !important;
         
         .fc-event {
-          margin: 2px 0;
+          margin: 4px 0;
+          opacity: 1 !important;
+          padding: 3px 4px !important;
         }
       }
-    }
-    
-    /* 事件容器更紧凑 */
-    .fc-daygrid-day-events {
-      padding: 0 1px !important;
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
     }
     
     /* 日期数字更紧凑 */
@@ -1275,6 +1243,32 @@ export default {
     border-color: var(--hx-border-level-1-color) !important;
   }
   
+  /* 确保弹窗完全不透明 */
+  .fc-popover,
+  .fc-popover-header,
+  .fc-popover-body {
+    opacity: 1 !important;
+    background-color: var(--hx-bg-color-container) !important;
+  }
+  
+  .fc-popover-header {
+    background-color: var(--hx-bg-color-specialcomponent) !important;
+  }
+  
+  /* 保留弹窗中事件的样式 */
+  .fc-popover .fc-event {
+    opacity: 1 !important;
+    background-color: transparent !important;
+  }
+  
+  .fc-popover .fc-event[data-category="财经"] {
+    border-left-color: var(--hx-brand-color-3) !important;
+  }
+  
+  .fc-popover .fc-event[data-category="行业"] {
+    border-left-color: var(--hx-sec-brand-color-3) !important;
+  }
+  
   /* 确保单元格边框完整显示 */
   .fc-scrollgrid {
     border-bottom: 1px solid var(--hx-border-level-1-color) !important;
@@ -1414,4 +1408,4 @@ export default {
     border-top-color: var(--hx-border-level-1-color) !important;
   }
 }
-</style> 
+</style>

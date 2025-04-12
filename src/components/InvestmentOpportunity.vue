@@ -24,6 +24,7 @@
     <div class="timeline-content">
       <DataTimeline 
         :items="currentTypeItems"
+        :expanded-item="expandedItem"
         @item-expanded="handleItemExpanded"
         :empty-text="`暂无${getEmptyText}数据`"
         empty-subtext="我们正在整理相关数据，请稍后查看"
@@ -79,16 +80,18 @@ export default {
   },
   data() {
     return {
-      currentType: 'stock',
+      currentType: 'market',
+      expandedItem: null,
       timeTagTypeMap: {
         '短期': 'time-short',
         '中期': 'time-mid',
         '长期': 'time-long'
       },
       opportunityTypes: [
-        { code: 'stock', name: '个股机会' },
+        { code: 'market', name: '市场机会' },
         { code: 'industry', name: '行业机会' },
-        { code: 'market', name: '市场机会' }
+        { code: 'stock', name: '个股机会' }
+
       ],
       opportunityData: {
         stock: [],
@@ -103,48 +106,89 @@ export default {
     },
     getEmptyText() {
       const typeMap = {
+        'market': '市场机会',
         'stock': '个股机会',
-        'industry': '行业机会',
-        'market': '市场机会'
+        'industry': '行业机会'
+
       }
       return typeMap[this.currentType] || '相关'
     }
   },
   methods: {
     switchType(code) {
-      this.currentType = code
+      this.currentType = code;
+      this.expandedItem = null;
     },
-    handleItemExpanded() {
-      // 空方法，保留以便接收事件
+    handleItemExpanded(data) {
+      this.expandedItem = data.expanded ? data.index : null;
     },
     parseJsonFromResponse(response) {
       try {
         if (response?.response?.text) {
-          const jsonStr = response.response.text.replace(/```json\n|\n```/g, '')
-          return JSON.parse(jsonStr)
+          // 获取原始文本
+          let jsonStr = response.response.text;
+          
+          // 移除markdown代码块标记
+          jsonStr = jsonStr.replace(/^[\s\n]*```json[\s\n]*/i, '');
+          jsonStr = jsonStr.replace(/[\s\n]*```[\s\n]*$/i, '');
+          
+          // 修复日期格式错误 - 处理多种情况
+          jsonStr = jsonStr.replace(/"date":(\d{4}\/\d{1,2}\/\d{1,2})"/, '"date":"$1"');  // 右引号缺左引号
+          jsonStr = jsonStr.replace(/"date":(\d{4}\/\d{1,2}\/\d{1,2}),/, '"date":"$1",'); // 无引号的日期
+          
+          // 尝试解析JSON
+          let parsedData = JSON.parse(jsonStr);
+          
+          return parsedData;
         }
-        return []
+        return [];
       } catch (error) {
-        console.error('Failed to parse response:', error)
-        return []
+        console.error('解析JSON失败:', error.message);
+        return [];
+      }
+    },
+    processOpportunityData(mockData, type) {
+      try {
+        if (!mockData) {
+          console.warn(`${type}机会数据不存在`);
+          return [];
+        }
+        
+        const parsedData = this.parseJsonFromResponse(mockData);
+        if (!Array.isArray(parsedData)) {
+          console.warn(`${type}机会数据格式错误:`, parsedData);
+          return [];
+        }
+        
+        // 标准化日期格式
+        const processedData = parsedData.map(item => ({
+          ...item,
+          date: item.date.split('/').map(n => n.padStart(2, '0')).join('/')
+        }));
+        
+        return processedData;
+      } catch (error) {
+        console.error(`处理${type}机会数据失败:`, error);
+        return [];
       }
     }
   },
   async created() {
     try {
-      // 分别获取三种类型的数据
-      this.opportunityData.stock = this.parseJsonFromResponse(InvestmentOpportunitiesMockData_stock)
-      this.opportunityData.industry = this.parseJsonFromResponse(InvestmentOpportunitiesMockData_industry)
-      this.opportunityData.market = this.parseJsonFromResponse(InvestmentOpportunitiesMockData_market)
+      // 统一处理三种类型的数据
+      const mockDataMap = {
+        stock: InvestmentOpportunitiesMockData_stock,
+        industry: InvestmentOpportunitiesMockData_industry,
+        market: InvestmentOpportunitiesMockData_market
+      };
       
-      // 对每种类型的数据按日期排序
-      Object.keys(this.opportunityData).forEach(key => {
-        this.opportunityData[key] = this.opportunityData[key].sort((a, b) => 
-          new Date(b.date) - new Date(a.date)
-        )
-      })
+      // 处理并排序所有类型的数据
+      Object.entries(mockDataMap).forEach(([key, mockData]) => {
+        this.opportunityData[key] = this.processOpportunityData(mockData, key)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+      });
     } catch (error) {
-      console.error('Failed to fetch opportunities:', error)
+      console.error('加载投资机会数据失败:', error);
     }
   }
 }

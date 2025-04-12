@@ -12,7 +12,7 @@
           v-for="(item, index) in items" 
           :key="index"
           class="timeline-item"
-          :class="{'expanded': expandedItem === index, 'is-today': isToday(item.date)}"
+          :class="{'expanded': currentExpandedItem === index, 'is-today': isToday(item.date)}"
           @click="toggleExpand(index)"
         >
           <!-- 圆点标记容器，需要与时间线对齐 -->
@@ -44,7 +44,7 @@
               </div>
               
               <div class="expand-icon">
-                <i v-if="expandedItem !== index" class="fas fa-chevron-down"></i>
+                <i v-if="currentExpandedItem !== index" class="fas fa-chevron-down"></i>
                 <i v-else class="fas fa-chevron-up"></i>
               </div>
             </div>
@@ -57,7 +57,7 @@
             </div>
             
             <!-- 详情区域 -->
-            <div class="item-details" v-show="expandedItem === index">
+            <div class="item-details" v-show="currentExpandedItem === index">
               <!-- 解读部分 -->
               <div class="context-container" v-if="item.context">
                 <div class="section-label"><i class="fas fa-history"></i> 解读</div>
@@ -131,7 +131,7 @@ export default {
       type: Array,
       required: true
     },
-    initialExpandedItem: {
+    expandedItem: {
       type: Number,
       default: null
     },
@@ -146,17 +146,34 @@ export default {
   },
   data() {
     return {
-      expandedItem: null
+      internalExpandedItem: null
+    }
+  },
+  computed: {
+    // 如果提供了 expandedItem prop，则使用它，否则使用内部状态
+    currentExpandedItem() {
+      return this.expandedItem !== undefined ? this.expandedItem : this.internalExpandedItem;
     }
   },
   methods: {
     toggleExpand(index) {
-      if (this.expandedItem === index) {
-        this.expandedItem = null;
+      if (this.expandedItem !== undefined) {
+        // 如果提供了 expandedItem prop，通过事件通知父组件更新
+        const newExpandedItem = this.expandedItem === index ? null : index;
+        this.$emit('item-expanded', { 
+          index, 
+          item: this.items[index], 
+          expanded: newExpandedItem === index 
+        });
       } else {
-        this.expandedItem = index;
+        // 否则使用内部状态
+        this.internalExpandedItem = this.internalExpandedItem === index ? null : index;
+        this.$emit('item-expanded', { 
+          index, 
+          item: this.items[index], 
+          expanded: this.internalExpandedItem === index 
+        });
       }
-      this.$emit('item-expanded', { index, item: this.items[index], expanded: this.expandedItem === index });
     },
     
     formatDate(dateStr) {
@@ -264,6 +281,8 @@ export default {
       display: flex;
       margin-bottom: var(--hx-comp-margin-m);
       position: relative;
+      width: 100%;
+      min-width: 0;
       
       .item-content {
         flex: 1;
@@ -271,18 +290,22 @@ export default {
         background-color: var(--hx-bg-color-specialcomponent);
         border-radius: var(--hx-radius-small);
         padding: var(--hx-comp-paddingTB-xs) var(--hx-comp-paddingLR-s);
-        border: 1px solid var(--hx-bg-color-specialcomponent);
+        width: 100%;
+        min-width: 0;
         
         .item-header-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: var(--hx-comp-margin-xs);
+          width: 100%;
+          min-width: 0;
           
           .item-meta {
             display: flex;
             align-items: center;
             gap: var(--hx-comp-margin-s);
+            min-width: 0;
           }
         }
         
@@ -291,6 +314,8 @@ export default {
           justify-content: space-between;
           align-items: center;
           margin-bottom: var(--hx-comp-margin-xs);
+          width: 100%;
+          min-width: 0;
           
           .item-tag-and-title {
             display: flex;
@@ -299,6 +324,7 @@ export default {
             flex: 1;
             min-width: 0;
             overflow: hidden;
+            width: 100%;
           }
           
           .item-title {
@@ -310,8 +336,9 @@ export default {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex-shrink: 1;
+            flex: 1;
             min-width: 0;
+            width: 100%;
           }
           
           .expand-icon {
@@ -465,13 +492,18 @@ export default {
       
       &.is-today {
         .item-content {
-          border: 1px solid var(--hx-brand-color-3);
+          // 移除今日高亮边框
         }
       }
       
       &.expanded {
         .item-content {
-          border: 1px solid var(--hx-brand-color-3);
+          // 移除展开时的高亮边框
+          
+          .item-title {
+            white-space: normal;
+            word-wrap: break-word;
+          }
         }
         
         .expand-icon i {
@@ -486,6 +518,7 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        min-width: 84px;
         
         .marker {
           position: absolute;
@@ -510,6 +543,7 @@ export default {
           top: 8px;
           font-size: 12px;
           color: var(--hx-text-color-tertiary);
+          white-space: nowrap;
           
           &.past-or-today {
             color: var(--hx-text-color-primary);
@@ -523,6 +557,7 @@ export default {
           font-size: 11px;
           color: var(--hx-brand-color-3);
           font-weight: 500;
+          white-space: nowrap;
         }
         
         .tomorrow-text {
@@ -532,6 +567,7 @@ export default {
           font-size: 11px;
           color: var(--hx-warning-color-3, #d97706);
           font-weight: 500;
+          white-space: nowrap;
         }
       }
     }
@@ -581,7 +617,8 @@ export default {
     .timeline-items {
       .timeline-item {
         .date-marker {
-          width: var(--hx-size-10);
+          width: 84px;
+          min-width: 84px;
         }
         
         .item-content {

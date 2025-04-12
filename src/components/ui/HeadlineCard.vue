@@ -49,13 +49,13 @@
           </div>
           
           <!-- 利好影响 -->
-          <div v-if="item.PositiveImpact.length" class="info-row positive">
+          <div v-if="item.PositiveImpact.filter(tag => tag.trim() !== '').length" class="info-row positive">
             <div class="info-label">
               <i class="fas fa-arrow-up"></i>
               <span>利好</span>
             </div>
             <div class="info-content">
-              <div v-for="(tag, idx) in item.PositiveImpact" 
+              <div v-for="(tag, idx) in item.PositiveImpact.filter(tag => tag.trim() !== '')" 
                    :key="idx" 
                    class="impact-tag positive">
                 {{ tag }}
@@ -64,13 +64,13 @@
           </div>
           
           <!-- 利空影响 -->
-          <div v-if="item.NegativeImpact.length" class="info-row negative">
+          <div v-if="item.NegativeImpact.filter(tag => tag.trim() !== '').length" class="info-row negative">
             <div class="info-label">
               <i class="fas fa-arrow-down"></i>
               <span>利空</span>
             </div>
             <div class="info-content">
-              <div v-for="(tag, idx) in item.NegativeImpact" 
+              <div v-for="(tag, idx) in item.NegativeImpact.filter(tag => tag.trim() !== '')" 
                    :key="idx" 
                    class="impact-tag negative">
                 {{ tag }}

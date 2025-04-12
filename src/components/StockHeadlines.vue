@@ -277,6 +277,53 @@ export default {
         this.swiper.slideNext();
       }
     },
+
+    parseJsonFromResponse(response) {
+      try {
+        if (response?.response?.text) {
+          // 获取原始文本
+          let jsonStr = response.response.text;
+          
+          // 移除所有可能的markdown标记和空白
+          jsonStr = jsonStr.replace(/^[\s\n]*```json[\s\n]*/gmi, '');  // 移除开头的```json
+          jsonStr = jsonStr.replace(/[\s\n]*```[\s\n]*$/gmi, '');      // 移除结尾的```
+          jsonStr = jsonStr.trim();  // 移除首尾空白
+          
+          // 调试输出
+          console.log('处理后的JSON字符串:', jsonStr.substring(0, 200));
+          
+          // 尝试解析JSON
+          let parsedData;
+          try {
+            parsedData = JSON.parse(jsonStr);
+          } catch (parseError) {
+            console.error('JSON解析错误，尝试修复格式:', parseError);
+            // 尝试修复常见的JSON格式问题
+            jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');  // 移除尾随逗号
+            jsonStr = jsonStr.replace(/([^"\\])"/g, '$1\\"');  // 转义未转义的引号
+            jsonStr = jsonStr.replace(/\n/g, '\\n');  // 转义换行符
+            console.log('修复后的JSON字符串:', jsonStr.substring(0, 200));
+            parsedData = JSON.parse(jsonStr);
+          }
+          
+          // 打印解析结果用于调试
+          console.log('解析成功，数据条数:', Array.isArray(parsedData) ? parsedData.length : '非数组');
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            console.log('第一条数据示例:', parsedData[0]);
+          }
+          
+          return parsedData;
+        }
+        return []
+      } catch (error) {
+        console.error('解析JSON失败:', error);
+        console.error('原始响应:', response);
+        if (response?.response?.text) {
+          console.error('原始文本前100个字符:', response.response.text.substring(0, 100));
+        }
+        return []
+      }
+    },
   },
   mounted() {
     // 使用预设ID获取初始数据

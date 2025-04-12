@@ -24,6 +24,7 @@
     <div class="timeline-content">
       <DataTimeline 
         :items="currentIndustryItems"
+        :expanded-item="expandedItem"
         @item-expanded="handleItemExpanded"
       >
         <template v-slot:item-tag="{ item }">
@@ -57,6 +58,7 @@ export default {
   data() {
     return {
       currentIndustry: 'real_estate',
+      expandedItem: null,
       timeTagTypeMap: {
         '短期': 'time-short',
         '中期': 'time-mid',
@@ -330,10 +332,11 @@ export default {
   },
   methods: {
     switchIndustry(code) {
-      this.currentIndustry = code
+      this.currentIndustry = code;
+      this.expandedItem = null;
     },
-    handleItemExpanded() {
-      // 空方法，保留以便接收事件
+    handleItemExpanded(data) {
+      this.expandedItem = data.expanded ? data.index : null;
     },
     getEventTypeClass(type) {
       const typeClasses = {

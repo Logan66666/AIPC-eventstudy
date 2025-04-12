@@ -9,7 +9,9 @@
     
     <div class="economy-content">
       <!-- 使用DataTimeline组件 -->
-      <DataTimeline :items="economyData" @item-expanded="handleExpand">
+      <DataTimeline :items="economyData" 
+        :expanded-item="expandedItem" 
+        @item-expanded="handleExpand">
         <!-- 自定义标签 -->
         <template v-slot:item-tag="{ item }">
           <div v-if="item.actual !== undefined && item.actual !== '--' && item.impact !== 'pending'" 

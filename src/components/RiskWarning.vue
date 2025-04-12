@@ -24,6 +24,7 @@
     <div class="timeline-content">
       <DataTimeline 
         :items="currentTypeItems"
+        :expanded-item="expandedItem"
         @item-expanded="handleItemExpanded"
         :empty-text="`暂无${getEmptyText}数据`"
         empty-subtext="我们正在整理相关风险事件，请稍后查看"
@@ -49,7 +50,7 @@
         </template>
 
         <template v-slot:item-title="{ item }">
-          <h3 class="item-title">{{ item.title }}</h3>
+          <h3 class="item-title">{{ item.item?.stockname ? `【${item.item.stockname}】${item.title}` : item.title }}</h3>
         </template>
 
         <template v-slot:item-preview="{ item }">
@@ -67,6 +68,11 @@
 <script>
 import DataTimeline from './ui/DataTimeline.vue'
 import EventTag from './ui/EventTag.vue'
+import { 
+  riskWarningMockData_stock,
+  riskWarningMockData_industry,
+  riskWarningMockData_market
+} from '../utils/mockData'
 
 export default {
   name: 'RiskWarning',
@@ -76,220 +82,28 @@ export default {
   },
   data() {
     return {
-      currentType: 'stock',
+      currentType: 'market',
+      expandedItem: null,
       timeTagTypeMap: {
         '短期': 'time-short',
         '中期': 'time-mid',
         '长期': 'time-long'
       },
       riskTypes: [
-        { code: 'stock', name: '个股风险' },
+        { code: 'market', name: '市场风险' },
         { code: 'industry', name: '行业风险' },
-        { code: 'market', name: '市场风险' }
+        { code: 'stock', name: '个股风险' }
       ],
       riskData: {
-        stock: [
-          {
-            date: '2025/5/15',
-            title: '【腾讯控股】业绩不及预期，云计算业务增速放缓',
-            summary: '公司Q1营收同比下降15%，毛利率下滑，现金流承压',
-            context: '受行业竞争加剧和成本上升影响，公司经营压力加大。',
-            timeTag: '短期',
-            riskLevel: '高风险',
-            importance: 3,
-            highlights: [
-              {
-                tag: '业绩下滑',
-                reason: '营收和利润双双下滑，现金流压力大'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险提示',
-                reason: '及时提示投资者关注公司经营风险'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '股价承压',
-                reason: '可能对公司股价造成较大压力'
-              }
-            ]
-          },
-          {
-            date: '2025/5/10',
-            title: '【恒瑞医药】研发失败，重点新药临床不达预期',
-            summary: '公司重点研发项目III期临床试验未达到预期目标',
-            context: '研发失败将影响公司未来业绩增长。',
-            timeTag: '中期',
-            riskLevel: '中风险',
-            importance: 2,
-            highlights: [
-              {
-                tag: '研发风险',
-                reason: '临床试验数据不及预期，项目可能终止'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险提示',
-                reason: '帮助投资者了解公司研发风险'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '估值承压',
-                reason: '可能影响公司估值水平'
-              }
-            ]
-          }
-        ],
-        industry: [
-          {
-            date: '2025/5/15',
-            title: '【房地产】政策收紧，多地出台调控措施',
-            summary: '多地出台房地产调控政策，融资渠道收紧',
-            context: '房地产行业面临政策调控和融资压力。',
-            timeTag: '中期',
-            riskLevel: '高风险',
-            importance: 3,
-            highlights: [
-              {
-                tag: '政策风险',
-                reason: '调控政策持续收紧，行业景气度下行'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险提示',
-                reason: '提示投资者关注行业政策风险'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '行业承压',
-                reason: '可能影响整个行业估值水平'
-              }
-            ]
-          },
-          {
-            date: '2025/5/12',
-            title: '【新能源】补贴退坡，行业格局面临重塑',
-            summary: '新能源汽车补贴政策调整，补贴力度减弱',
-            context: '补贴退坡将影响行业整体盈利能力。',
-            timeTag: '短期',
-            riskLevel: '中风险',
-            importance: 2,
-            highlights: [
-              {
-                tag: '政策调整',
-                reason: '补贴政策调整影响行业盈利'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险提示',
-                reason: '帮助投资者了解政策变化影响'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '盈利承压',
-                reason: '可能影响行业整体盈利水平'
-              }
-            ]
-          }
-        ],
-        market: [
-          {
-            date: '2025/5/15',
-            title: '【美股】流动性收紧，美联储加息预期升温',
-            summary: '美联储加息预期升温，全球流动性趋紧',
-            context: '全球流动性收紧可能影响市场整体估值。',
-            timeTag: '长期',
-            riskLevel: '高风险',
-            importance: 3,
-            highlights: [
-              {
-                tag: '流动性风险',
-                reason: '全球流动性收紧影响市场估值'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险提示',
-                reason: '提示投资者关注宏观风险'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '市场承压',
-                reason: '可能影响市场整体估值水平'
-              }
-            ]
-          },
-          {
-            date: '2025/5/10',
-            title: '【港股】地缘政治风险上升，外资流出加剧',
-            summary: '国际关系紧张，地缘政治风险加大',
-            context: '地缘政治风险可能影响市场风险偏好。',
-            timeTag: '中期',
-            riskLevel: '中风险',
-            importance: 2,
-            highlights: [
-              {
-                tag: '地缘风险',
-                reason: '地缘政治风险影响市场情绪'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险提示',
-                reason: '帮助投资者了解外部风险'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '情绪承压',
-                reason: '可能影响市场风险偏好'
-              }
-            ]
-          },
-          {
-            date: '2025/5/8',
-            title: '【A股】流动性风险上升，融资环境收紧',
-            summary: '央行货币政策回归中性，市场流动性边际收紧',
-            context: '流动性环境变化导致风险偏好下降。',
-            timeTag: '短期',
-            riskLevel: '中风险',
-            importance: 2,
-            highlights: [
-              {
-                tag: '流动性变化',
-                reason: '货币政策边际转向，流动性环境收紧'
-              }
-            ],
-            benefits: [
-              {
-                tag: '风险防范',
-                reason: '有助于投资者提前应对流动性风险'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '估值承压',
-                reason: '高估值板块面临调整压力'
-              }
-            ]
-          }
-        ]
+        stock: [],
+        industry: [],
+        market: []
       }
     }
   },
   computed: {
     currentTypeItems() {
-      const items = this.riskData[this.currentType] || []
-      return items.sort((a, b) => new Date(a.date) - new Date(b.date))
+      return this.riskData[this.currentType] || []
     },
     getEmptyText() {
       const typeMap = {
@@ -303,11 +117,79 @@ export default {
   methods: {
     switchType(code) {
       this.currentType = code
+      this.expandedItem = null
     },
-    handleItemExpanded() {
-      // 空方法，保留以便接收事件
+    handleItemExpanded(data) {
+      this.expandedItem = data.expanded ? data.index : null
     },
-
+    parseJsonFromResponse(response) {
+      try {
+        if (response?.response?.text) {
+          // 获取原始文本
+          let jsonStr = response.response.text;
+          
+          // 移除markdown代码块标记
+          jsonStr = jsonStr.replace(/^[\s\n]*```json[\s\n]*/i, '');
+          jsonStr = jsonStr.replace(/[\s\n]*```[\s\n]*$/i, '');
+          
+          // 修复日期格式错误 - 处理多种情况
+          jsonStr = jsonStr.replace(/"date":(\d{4}\/\d{1,2}\/\d{1,2})"/, '"date":"$1"');  // 右引号缺左引号
+          jsonStr = jsonStr.replace(/"date":(\d{4}\/\d{1,2}\/\d{1,2}),/, '"date":"$1",'); // 无引号的日期
+          
+          // 尝试解析JSON
+          let parsedData = JSON.parse(jsonStr);
+          
+          return parsedData;
+        }
+        return [];
+      } catch (error) {
+        console.error('解析JSON失败:', error.message);
+        return [];
+      }
+    },
+    processRiskData(mockData, type) {
+      try {
+        if (!mockData) {
+          console.warn(`${type}风险数据不存在`);
+          return [];
+        }
+        
+        const parsedData = this.parseJsonFromResponse(mockData);
+        if (!Array.isArray(parsedData)) {
+          console.warn(`${type}风险数据格式错误:`, parsedData);
+          return [];
+        }
+        
+        // 标准化日期格式
+        const processedData = parsedData.map(item => ({
+          ...item,
+          date: item.date.split('/').map(n => n.padStart(2, '0')).join('/')
+        }));
+        
+        return processedData;
+      } catch (error) {
+        console.error(`处理${type}风险数据失败:`, error);
+        return [];
+      }
+    }
+  },
+  async created() {
+    try {
+      // 统一处理三种类型的数据
+      const mockDataMap = {
+        stock: riskWarningMockData_stock,
+        industry: riskWarningMockData_industry,
+        market: riskWarningMockData_market
+      };
+      
+      // 处理并排序所有类型的数据
+      Object.entries(mockDataMap).forEach(([key, mockData]) => {
+        this.riskData[key] = this.processRiskData(mockData, key)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+      });
+    } catch (error) {
+      console.error('加载风险数据失败:', error);
+    }
   }
 }
 </script>
