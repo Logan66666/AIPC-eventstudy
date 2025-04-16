@@ -48,11 +48,8 @@
         </template>
         
         <template v-slot:item-title="{ item }">
-          <div class="company-info">
-            <span class="company-name">{{ item.companyName }}</span>
-            <span class="company-code">{{ item.companyCode }}</span>
-          </div>
-          <h3 class="item-title">{{ item.title }}</h3>
+
+          <h3 class="item-title">【{{ item.companyName }}】{{ item.title }}</h3>
         </template>
         
         <template v-slot:item-preview="{ item }">
@@ -68,6 +65,19 @@
 <script>
 import DataTimeline from './ui/DataTimeline.vue'
 import EventTag from './ui/EventTag.vue'
+import { companyNewsMockData } from '@/utils/mockData' // 引入 mock 数据
+
+// Mock数据中的中文类型 -> 组件内部使用的code
+const typeCodeMap = {
+  '重大事项': 'major',
+  '业绩动态': 'performance',
+  '经营动态': 'operation',
+  '市场表现': 'market',
+  '投资者关系': 'investor',
+};
+
+// 组件内部使用的code -> Mock数据中的中文类型 (如果需要反向查找)
+// const codeTypeMap = Object.fromEntries(Object.entries(typeCodeMap).map(a => a.reverse()));
 
 export default {
   name: 'CompanyNews',
@@ -77,218 +87,75 @@ export default {
   },
   data() {
     return {
-      currentType: 'performance',
+      currentType: 'major', // 默认选中 "重大事项" 可能更合适
       expandedItem: null,
       timeTagTypeMap: {
         '短期': 'time-short',
         '中期': 'time-mid',
         '长期': 'time-long'
       },
+      // 更新事件类型以匹配 mock 数据
       eventTypes: [
+        { code: 'major', name: '重大事项' },  
         { code: 'performance', name: '业绩动态' },
-        { code: 'major', name: '重大事项' },
         { code: 'operation', name: '经营动态' },
+        { code: 'market', name: '市场表现' }, // 新增
         { code: 'investor', name: '投资者关系' }
       ],
-      companyEvents: {
-        performance: [
-          {
-            companyName: '贵州茅台',
-            companyCode: '600519',
-            date: '2025/5/15',
-            title: '发布2025年一季度业绩快报',
-            summary: '公司发布2025年Q1业绩快报，营收同比增长23.5%，净利润同比增长25.8%，超市场预期',
-            context: '白酒行业复苏，高端酒企业绩弹性显现。',
-            timeTag: '短期',
-            importance: 3,
-            eventType: '业绩快报',
-            highlights: [
-              {
-                tag: '超预期增长',
-                reason: '营收和利润增速均超市场预期'
-              }
-            ],
-            benefits: [
-              {
-                tag: '行业复苏',
-                reason: '高端白酒需求回暖，渠道库存健康'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '高基数',
-                reason: '下半年面临去年高基数影响'
-              }
-            ]
-          },
-          {
-            companyName: '招商银行',
-            companyCode: '600036',
-            date: '2025/5/13',
-            title: '发布2024年年度报告',
-            summary: '营收同比增长12.3%，净利润增长15.6%，不良率1.02%，资本充足率15.8%',
-            context: '银行业经营稳健，资产质量持续改善。',
-            timeTag: '中期',
-            importance: 3,
-            eventType: '年报',
-            highlights: [
-              {
-                tag: '稳健增长',
-                reason: '主要经营指标稳步提升'
-              }
-            ],
-            benefits: [
-              {
-                tag: '质量改善',
-                reason: '资产质量保持优良，拨备充足'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '息差压力',
-                reason: '净息差仍面临收窄压力'
-              }
-            ]
-          }
-        ],
-        major: [
-          {
-            companyName: '宁德时代',
-            companyCode: '300750',
-            date: '2025/5/14',
-            title: '签署重大战略合作协议',
-            summary: '与三家国际车企签署电池供应战略协议，预计未来三年供应规模超过200GWh',
-            context: '全球电动化加速，动力电池龙头持续扩大市场份额。',
-            timeTag: '长期',
-            importance: 3,
-            eventType: '战略合作',
-            highlights: [
-              {
-                tag: '订单增长',
-                reason: '新增订单显著提升未来业绩确定性'
-              }
-            ],
-            benefits: [
-              {
-                tag: '份额提升',
-                reason: '全球市占率有望进一步提升'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '竞争加剧',
-                reason: '海外市场竞争日趋激烈'
-              }
-            ]
-          }
-        ],
-        operation: [
-          {
-            companyName: '比亚迪',
-            companyCode: '002594',
-            date: '2025/5/13',
-            title: '发布新一代旗舰车型',
-            summary: '发布新一代高端车型，搭载自研芯片和操作系统，预售价45-60万元',
-            context: '新能源车企加速向上突破，品牌溢价提升。',
-            timeTag: '中期',
-            importance: 2,
-            eventType: '新品发布',
-            highlights: [
-              {
-                tag: '产品升级',
-                reason: '技术升级带动产品力提升'
-              }
-            ],
-            benefits: [
-              {
-                tag: '品牌提升',
-                reason: '高端产品助力品牌向上'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '市场竞争',
-                reason: '高端市场竞争激烈'
-              }
-            ]
-          },
-          {
-            companyName: '华为汽车',
-            companyCode: '888888',
-            date: '2025/5/11',
-            title: '智能驾驶技术突破',
-            summary: '发布新一代智能驾驶解决方案，复杂场景识别准确率提升40%',
-            context: '智能驾驶技术迭代加快，产业化进程提速。',
-            timeTag: '中期',
-            importance: 3,
-            eventType: '技术突破',
-            highlights: [
-              {
-                tag: '技术领先',
-                reason: '核心技术取得突破性进展'
-              }
-            ],
-            benefits: [
-              {
-                tag: '竞争优势',
-                reason: '技术优势带来市场机遇'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '落地周期',
-                reason: '技术产业化需要时间验证'
-              }
-            ]
-          }
-        ],
-        investor: [
-          {
-            companyName: '招商银行',
-            companyCode: '600036',
-            date: '2025/5/12',
-            title: '公布2024年度分红方案',
-            summary: '拟每10股派发现金红利5.2元，股息率达4.5%',
-            context: '银行业稳健经营，现金分红能力强。',
-            timeTag: '短期',
-            importance: 2,
-            eventType: '利润分配',
-            highlights: [
-              {
-                tag: '分红提升',
-                reason: '分红力度超过去年，股息率具有吸引力'
-              }
-            ],
-            benefits: [
-              {
-                tag: '回报提升',
-                reason: '高分红提升股东回报'
-              }
-            ],
-            drawbacks: [
-              {
-                tag: '资本约束',
-                reason: '需平衡分红与资本补充'
-              }
-            ]
-          }
-        ]
-      }
+      // companyEvents: { ... } // 删除旧的静态数据
     }
   },
   computed: {
+    // 解析并合并所有 mock 事件数据
+    allParsedEvents() {
+      try {
+        const allEvents = companyNewsMockData.response.text.reduce((acc, jsonText) => {
+          try {
+            // 移除 markdown 标记并解析 JSON
+            const cleanedJsonText = jsonText.replace(/```json\n|\n```/g, '');
+            const newsArray = JSON.parse(cleanedJsonText);
+            // 确保解析出来的是数组
+            if (Array.isArray(newsArray)) {
+               // 添加兼容字段
+               const compatibleArray = newsArray.map(event => ({
+                 ...event,
+                 companyName: event.item?.stockname || 'N/A', // 兼容模板
+                 companyCode: event.item?.stockcode || 'N/A', // 兼容模板
+               }));
+              return [...acc, ...compatibleArray];
+            } else {
+              console.warn('解析结果非数组:', newsArray);
+              return acc;
+            }
+          } catch (e) {
+            console.error('解析单个JSON失败:', jsonText, e);
+            return acc; // 跳过解析失败的部分
+          }
+        }, []);
+        return allEvents;
+      } catch (e) {
+        console.error('处理新闻数据失败:', e);
+        return []; // 出错时返回空数组
+      }
+    },
+    // 根据当前选中的类型筛选事件
     currentTypeItems() {
-      const items = this.companyEvents[this.currentType] || []
-      return items.sort((a, b) => new Date(b.date) - new Date(a.date))
+      const selectedTypeCode = this.currentType;
+      const filteredEvents = this.allParsedEvents.filter(event => {
+        // 使用映射关系将事件的中文类型转换为内部代码进行比较
+        return typeCodeMap[event.type] === selectedTypeCode;
+      });
+      // 按日期降序排序
+      return filteredEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
   },
   methods: {
     switchType(code) {
-      this.currentType = code
-      this.expandedItem = null
+      this.currentType = code;
+      this.expandedItem = null; // 切换类型时收起展开项
     },
     handleItemExpanded(data) {
-      this.expandedItem = data.expanded ? data.index : null
+      this.expandedItem = data.expanded ? data.index : null;
     }
   }
 }
@@ -342,6 +209,8 @@ export default {
     gap: var(--hx-comp-margin-s);
     background-color: var(--hx-bg-color-container);
     overflow-x: auto;
+    border-bottom: 1px solid var(--hx-border-level-1-color); // 添加分割线可能更好看
+    flex-shrink: 0; // 防止被压缩
     
     &::-webkit-scrollbar {
       height: 4px;
@@ -357,7 +226,7 @@ export default {
     }
 
     .tab-item {
-      padding: 4px 8px;
+      padding: 8px 12px; // 稍微增大点击区域
       cursor: pointer;
       transition: all 0.2s ease;
       white-space: nowrap;
@@ -376,7 +245,7 @@ export default {
         &::after {
           content: '';
           position: absolute;
-          bottom: 0;
+          bottom: -1px; // 贴合边框
           left: 0;
           width: 100%;
           height: 2px;
@@ -388,8 +257,19 @@ export default {
 
   .timeline-content {
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto; // 允许内容滚动
     padding: var(--hx-comp-paddingTB-s) 0;
+     // 兼容性滚动条样式
+     &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: var(--hx-bg-color-specialcomponent);
+        border-radius: 3px;
+      }
   }
 
   .item-preview-content {
@@ -406,6 +286,7 @@ export default {
       -webkit-box-orient: vertical;
       line-clamp: 2;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -418,6 +299,7 @@ export default {
     .company-name {
       font-weight: 600;
       color: var(--hx-text-color-primary);
+      font-size: 14px; // 稍微放大
     }
     
     .company-code {
@@ -453,6 +335,9 @@ export default {
         padding: 6px 8px;
         font-size: 12px;
       }
+    }
+    .timeline-content {
+       padding: var(--hx-comp-paddingTB-xs) 0;
     }
   }
 }
