@@ -284,9 +284,16 @@ export default {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      line-clamp: 2;
       overflow: hidden;
-      text-overflow: ellipsis;
+    }
+  }
+
+  // 展开状态下移除行数限制
+  .timeline-item.expanded {
+    .event-summary {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
     }
   }
 

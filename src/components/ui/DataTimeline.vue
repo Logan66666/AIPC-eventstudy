@@ -1,10 +1,5 @@
 <template>
   <div class="data-timeline">
-    <!-- 左侧固定宽度的时间线容器 -->
-    <div class="timeline-indicator">
-      <div class="timeline-line"></div>
-    </div>
-    
     <!-- 右侧滚动内容区 -->
     <div class="timeline-items">
       <template v-if="items && items.length > 0">
@@ -15,14 +10,19 @@
           :class="{'expanded': currentExpandedItem === index, 'is-today': isToday(item.date)}"
           @click="toggleExpand(index)"
         >
-          <!-- 圆点标记容器，需要与时间线对齐 -->
+          <!-- 日期标记容器，需要与时间线对齐 -->
           <div class="date-marker">
-            <div class="marker" :class="{'past-or-today': isTodayOrBefore(item.date)}"></div>
             <div class="date-text" :class="{'past-or-today': isTodayOrBefore(item.date)}">
               {{ formatDate(item.date) }}
             </div>
             <div class="today-text" v-if="isToday(item.date)">今日</div>
             <div class="tomorrow-text" v-if="isTomorrow(item.date)">明日</div>
+          </div>
+          
+          <!-- 时间线指示器 -->
+          <div class="timeline-indicator">
+            <div class="timeline-line"></div>
+            <div class="marker" :class="{'past-or-today': isTodayOrBefore(item.date)}"></div>
           </div>
           
           <div class="item-content">
@@ -234,25 +234,6 @@ export default {
   display: flex;
   height: 100%;
   
-  .timeline-indicator {
-    width: 0px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    flex-shrink: 0;
-    
-    .timeline-line {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 20px;
-      width: 2px;
-      background-color: var(--hx-border-level-2-color);
-      opacity: 0.3;
-      transform: translateX(-50%);
-    }
-  }
-  
   .timeline-items {
     flex: 1;
     overflow-y: auto;
@@ -265,7 +246,6 @@ export default {
     &::-webkit-scrollbar-track {
       background: var(--hx-bg-color-container);
       border-radius: 4px;
-
     }
     
     &::-webkit-scrollbar-thumb {
@@ -283,6 +263,78 @@ export default {
       position: relative;
       width: 100%;
       min-width: 0;
+      
+      .timeline-indicator {
+        position: relative;
+        width: 0px;
+        flex-shrink: 0;
+        margin: 0 4px;
+        
+        .timeline-line {
+          position: absolute;
+          top: 0;
+          bottom: -24px; // 延伸到下一个item
+          left: 50%;
+          width: 2px;
+          background-color: var(--hx-border-level-2-color);
+          opacity: 0.3;
+          transform: translateX(-50%);
+        }
+        
+        .marker {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: var(--hx-bg-color-container);
+          border: 2px solid var(--hx-border-level-2-color);
+          top: 14px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 1;
+          
+          &.past-or-today {
+            border-color: var(--hx-text-color-primary);
+          }
+        }
+      }
+      
+      .date-marker {
+        width: 70px;
+        position: relative;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding-right: 8px;
+        
+        .date-text {
+          font-size: 12px;
+          color: var(--hx-text-color-tertiary);
+          white-space: nowrap;
+          margin-top: 8px;
+          
+          &.past-or-today {
+            color: var(--hx-text-color-primary);
+          }
+        }
+        
+        .today-text {
+          font-size: 11px;
+          color: var(--hx-brand-color-3);
+          font-weight: 500;
+          white-space: nowrap;
+          margin-top: 4px;
+        }
+        
+        .tomorrow-text {
+          font-size: 11px;
+          color: var(--hx-warning-color-3, #d97706);
+          font-weight: 500;
+          white-space: nowrap;
+          margin-top: 4px;
+        }
+      }
       
       .item-content {
         flex: 1;
@@ -368,6 +420,11 @@ export default {
           color: var(--hx-text-color-secondary);
           margin-bottom: var(--hx-comp-margin-s);
           line-height: 1.5;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
         
         .item-details {
@@ -504,70 +561,17 @@ export default {
             white-space: normal;
             word-wrap: break-word;
           }
+
+          .item-preview {
+            display: block !important;
+            -webkit-line-clamp: unset !important;
+            line-clamp: unset !important;
+            overflow: visible !important;
+          }
         }
         
         .expand-icon i {
           transform: rotate(180deg);
-        }
-      }
-      
-      .date-marker {
-        width: 84px;
-        position: relative;
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        min-width: 84px;
-        
-        .marker {
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background-color: var(--hx-bg-color-container);
-          border: 2px solid var(--hx-border-level-2-color);
-          top: 14px;
-          left: 20px;
-          transform: translateX(-50%);
-          z-index: 1;
-          
-          &.past-or-today {
-            border-color: var(--hx-text-color-primary);
-          }
-        }
-
-        .date-text {
-          position: absolute;
-          left: 30px;
-          top: 8px;
-          font-size: 12px;
-          color: var(--hx-text-color-tertiary);
-          white-space: nowrap;
-          
-          &.past-or-today {
-            color: var(--hx-text-color-primary);
-          }
-        }
-        
-        .today-text {
-          position: absolute;
-          left: 30px;
-          top: 26px;
-          font-size: 11px;
-          color: var(--hx-brand-color-3);
-          font-weight: 500;
-          white-space: nowrap;
-        }
-        
-        .tomorrow-text {
-          position: absolute;
-          left: 30px;
-          top: 26px;
-          font-size: 11px;
-          color: var(--hx-warning-color-3, #d97706);
-          font-weight: 500;
-          white-space: nowrap;
         }
       }
     }
@@ -617,8 +621,12 @@ export default {
     .timeline-items {
       .timeline-item {
         .date-marker {
-          width: 84px;
-          min-width: 84px;
+          width: 60px;
+          min-width: 60px;
+        }
+        
+        .timeline-indicator {
+          margin: 0 8px;
         }
         
         .item-content {

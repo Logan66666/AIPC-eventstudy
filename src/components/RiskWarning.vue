@@ -301,45 +301,6 @@ export default {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 4px;
-      
-      .risk-level {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 2px;
-        background-color: rgba(var(--hx-error-color-rgb, 255, 0, 0), 0.1);
-        
-        i {
-          font-size: 12px;
-          
-          &.risk-high-icon {
-            color: var(--hx-error-color-3);
-          }
-          
-          &.risk-mid-icon {
-            color: var(--hx-warning-color-3);
-          }
-          
-          &.risk-low-icon {
-            color: var(--hx-success-color-3);
-          }
-        }
-        
-        span {
-          color: var(--hx-text-color-secondary);
-          white-space: nowrap;
-        }
-      }
-    }
-    
-    .event-title {
-      margin: 0 0 4px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--hx-text-color-primary);
-      line-height: 1.4;
     }
     
     .event-summary {
@@ -351,6 +312,15 @@ export default {
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+  }
+
+  // 展开状态下移除行数限制
+  .timeline-item.expanded {
+    .event-summary {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
     }
   }
 

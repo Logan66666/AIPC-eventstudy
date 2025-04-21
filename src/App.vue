@@ -46,6 +46,19 @@
         <CompanyNews />
       </div>
     </div>
+    
+    <!-- 页面底部声明 -->
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p class="disclaimer">
+          本页面功能涉及AI筛选、总结和分析，内容仅供参考，不代表同花顺观点。我们力求但不保证这些内容总结的准确性、时效性、完整性、适用性、可靠性或原创性。<br>
+          如有出入请以证监会指定上市公司信息披露平台为准；如有投资者据此操作，风险自担，同花顺对此不承担任何责任。
+        </p>
+        <p class="contact">
+          如果您有任何疑问或需要更多信息，请联系我们。
+        </p>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -101,6 +114,8 @@ export default {
   background-color: var(--hx-bg-color-page);
   color: var(--hx-text-color-primary);
   font: var(--hx-font-body-medium);
+  display: flex;
+  flex-direction: column;
   
   .content-container {
     padding: var(--hx-size-6);
@@ -243,15 +258,30 @@ export default {
 }
 
 .main-footer {
-  background-color: var(--hx-bg-color-container);
-  color: var(--hx-text-color-secondary);
-  padding: var(--hx-comp-paddingTB-s) var(--hx-comp-paddingLR-s);
+  background-color: var(--hx-bg-color-page);
+  color: var(--hx-text-color-tertiary);
+  padding: var(--hx-comp-paddingTB-l) var(--hx-comp-paddingLR-l);
   text-align: center;
-  font: var(--hx-font-link-small);
   border-top: 1px solid var(--hx-border-level-1-color);
+  margin-top: auto;
   
-  p {
-    margin: 0;
+  .footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--hx-comp-paddingLR-s);
+    color: var(--hx-text-color-tertiary);
+    
+    .disclaimer {
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: var(--hx-comp-margin-s);
+      color: var(--hx-text-color-tertiary);
+    }
+    
+    .contact {
+      font-size: 12px;
+      color: var(--hx-text-color-tertiary);
+    }
   }
 }
 

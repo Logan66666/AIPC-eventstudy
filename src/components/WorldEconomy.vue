@@ -33,7 +33,7 @@
               <div class="metric-value">{{ item.expected }}{{ item.unit }}</div>
                   </div>
             <div class="metric" role="group" aria-label="实际">
-                    <div class="metric-label">实际</div>
+                    <div class="metric-label">公布</div>
               <div class="metric-value" :class="[item.actual && item.actual !== '--' ? getValueClass(item) : '']">
                 {{ item.actual }}{{ item.unit }}
               </div>
@@ -65,97 +65,6 @@ export default {
     return {
       expandedItem: null,
       economyData: [
-        {
-          source: '数据',
-          date: '2025/3/24',
-          title: '美国5月密歇根大学消费者信心指数终值',
-          summary: '美国5月密歇根大学消费者信心指数预期为76.0，前值为77.2，等待数据公布',
-          actual: 78,
-          expected: 76.0,
-          previous: 77.2,
-          unit: '',
-          impact: 'positive', // 'pending'=未公布, 'positive'=好于预期, 'negative'=差于预期, 'neutral'=符合预期
-          context: '密歇根大学消费者信心指数是衡量美国消费者信心的重要指标，对预测美国未来几个月的消费支出具有重要参考价值。市场预计该数据将小幅下滑，需关注实际数据是否符合预期。',
-          highlights: [
-            { tag: '关注重点', reason: '该指标近期连续下行，若低于预期可能加剧市场对消费前景的担忧' },
-            { tag: '市场情绪', reason: '指标表现将影响对美联储未来政策路径的预期' }
-          ],
-          benefits: [
-            { tag: '可能利好', reason: '若数据好于预期，将提振消费者支出预期，利好零售板块' }
-          ],
-          drawbacks: [
-            { tag: '潜在风险', reason: '若数据大幅低于预期，可能加剧经济放缓担忧' }
-          ]
-        },
-        {
-          source: '数据',
-          date: '2025/3/28',
-          title: '美国5月密歇根大学消费者信心指数初值',
-          summary: '美国5月密歇根大学消费者信心指数初值为75.8，预期为76.0，前值为77.2',
-          actual: 75.8,
-          expected: 76.0,
-          previous: 77.2,
-          unit: '',
-          impact: 'negative', // 'pending'=未公布, 'positive'=好于预期, 'negative'=差于预期, 'neutral'=符合预期
-          context: '密歇根大学消费者信心指数是衡量美国消费者信心的重要指标，对预测美国未来几个月的消费支出具有重要参考价值。本次数据低于预期且较前值显著下降，反映出在通胀高企的背景下，美国消费者信心依然疲软。',
-          highlights: [
-            { tag: '指标下滑', reason: '终值较初值进一步走弱，表明月内消费者信心持续下滑' },
-            { tag: '连续下降', reason: '该指标已连续三个月下降，处于近一年来的相对低位' }
-          ],
-          benefits: [
-            { tag: '美债市场', reason: '消费信心疲软可能增加市场对美联储降息的预期，支撑美债价格' }
-          ],
-          drawbacks: [
-            { tag: '零售消费', reason: '消费者信心下降可能导致未来几个月消费支出放缓，对零售行业形成压力' },
-            { tag: '美元汇率', reason: '美国经济前景不确定性增加，可能对美元构成压力' }
-          ]
-        },
-        {
-          source: '指标',
-          date: '2025/4/2',
-          title: '美国上周首次申请失业救济人数',
-          summary: '美国上周首次申请失业救济人数为22.5万人，预期为23.0万人，前值为23.2万人',
-          actual: 225,
-          expected: 230,
-          previous: 232,
-          unit: '千人',
-          impact: 'positive',
-          context: '首次申请失业救济人数是衡量美国就业市场健康状况的高频指标。本次数据好于预期，表明美国就业市场仍然保持相对稳健，企业裁员压力暂时得到缓解。',
-          highlights: [
-            { tag: '优于预期', reason: '实际数据低于预期值和前值，表明就业市场韧性强于预期' },
-            { tag: '连续改善', reason: '该指标已连续两周下降，显示就业市场向好发展' }
-          ],
-          benefits: [
-            { tag: '美国股市', reason: '就业数据向好提振市场对美国经济的信心，有利于股市表现' },
-            { tag: '美元走势', reason: '美国经济相对强劲可能支撑美元走强' }
-          ],
-          drawbacks: [
-            { tag: '加息预期', reason: '强劲就业数据可能减弱市场对美联储降息的预期，给风险资产带来压力' }
-          ]
-        },
-        {
-          source: '经济',
-          date: '2025/4/3',
-          title: '日本第一季度GDP环比终值',
-          summary: '日本第一季度GDP环比终值萎缩0.4%，预期萎缩0.5%，初值萎缩0.5%',
-          actual: '--',
-          expected: -0.5,
-          previous: -0.5,
-          unit: '%',
-          impact: 'pending',
-          context: '日本GDP数据是衡量日本经济整体表现的重要指标。虽然第一季度GDP仍为负增长，但终值较初值有所改善，略好于市场预期，显示日本经济的韧性可能高于此前预计。',
-          highlights: [
-            { tag: '降幅收窄', reason: '终值较初值降幅收窄0.1个百分点，表明经济状况略好于初步估计' },
-            { tag: '连续下滑', reason: '日本经济连续两个季度出现负增长，技术性衰退已成定局' }
-          ],
-          benefits: [
-            { tag: '日元走势', reason: 'GDP数据略超预期可能减缓日元贬值压力' }
-          ],
-          drawbacks: [
-            { tag: '日本股市', reason: '经济衰退确认可能抑制投资者对日本市场的风险偏好' },
-            { tag: '政策预期', reason: '数据表明日本经济仍面临挑战，市场对日本央行收紧货币政策的预期可能减弱' }
-          ]
-        },
         {
           source: '数据',
           date: '2025/5/18',
@@ -224,8 +133,99 @@ export default {
             { tag: '核心通胀', reason: '剔除食品和能源的核心CPI仍保持高位，显示通胀压力仍广泛存在' },
             { tag: '降息预期', reason: '通胀数据与预期一致，未能为美联储提前降息提供更多空间' }
           ]
+        },
+        {
+          source: '经济',
+          date: '2025/4/3',
+          title: '日本第一季度GDP环比终值',
+          summary: '日本第一季度GDP环比终值萎缩0.4%，预期萎缩0.5%，初值萎缩0.5%',
+          actual: '--',
+          expected: -0.5,
+          previous: -0.5,
+          unit: '%',
+          impact: 'pending',
+          context: '日本GDP数据是衡量日本经济整体表现的重要指标。虽然第一季度GDP仍为负增长，但终值较初值有所改善，略好于市场预期，显示日本经济的韧性可能高于此前预计。',
+          highlights: [
+            { tag: '降幅收窄', reason: '终值较初值降幅收窄0.1个百分点，表明经济状况略好于初步估计' },
+            { tag: '连续下滑', reason: '日本经济连续两个季度出现负增长，技术性衰退已成定局' }
+          ],
+          benefits: [
+            { tag: '日元走势', reason: 'GDP数据略超预期可能减缓日元贬值压力' }
+          ],
+          drawbacks: [
+            { tag: '日本股市', reason: '经济衰退确认可能抑制投资者对日本市场的风险偏好' },
+            { tag: '政策预期', reason: '数据表明日本经济仍面临挑战，市场对日本央行收紧货币政策的预期可能减弱' }
+          ]
+        },
+        {
+          source: '指标',
+          date: '2025/4/2',
+          title: '美国上周首次申请失业救济人数',
+          summary: '美国上周首次申请失业救济人数为22.5万人，预期为23.0万人，前值为23.2万人',
+          actual: 225,
+          expected: 230,
+          previous: 232,
+          unit: '千人',
+          impact: 'positive',
+          context: '首次申请失业救济人数是衡量美国就业市场健康状况的高频指标。本次数据好于预期，表明美国就业市场仍然保持相对稳健，企业裁员压力暂时得到缓解。',
+          highlights: [
+            { tag: '优于预期', reason: '实际数据低于预期值和前值，表明就业市场韧性强于预期' },
+            { tag: '连续改善', reason: '该指标已连续两周下降，显示就业市场向好发展' }
+          ],
+          benefits: [
+            { tag: '美国股市', reason: '就业数据向好提振市场对美国经济的信心，有利于股市表现' },
+            { tag: '美元走势', reason: '美国经济相对强劲可能支撑美元走强' }
+          ],
+          drawbacks: [
+            { tag: '加息预期', reason: '强劲就业数据可能减弱市场对美联储降息的预期，给风险资产带来压力' }
+          ]
+        },
+        {
+          source: '数据',
+          date: '2025/3/28',
+          title: '美国5月密歇根大学消费者信心指数初值',
+          summary: '美国5月密歇根大学消费者信心指数初值为75.8，预期为76.0，前值为77.2',
+          actual: 75.8,
+          expected: 76.0,
+          previous: 77.2,
+          unit: '',
+          impact: 'negative', // 'pending'=未公布, 'positive'=好于预期, 'negative'=差于预期, 'neutral'=符合预期
+          context: '密歇根大学消费者信心指数是衡量美国消费者信心的重要指标，对预测美国未来几个月的消费支出具有重要参考价值。本次数据低于预期且较前值显著下降，反映出在通胀高企的背景下，美国消费者信心依然疲软。',
+          highlights: [
+            { tag: '指标下滑', reason: '终值较初值进一步走弱，表明月内消费者信心持续下滑' },
+            { tag: '连续下降', reason: '该指标已连续三个月下降，处于近一年来的相对低位' }
+          ],
+          benefits: [
+            { tag: '美债市场', reason: '消费信心疲软可能增加市场对美联储降息的预期，支撑美债价格' }
+          ],
+          drawbacks: [
+            { tag: '零售消费', reason: '消费者信心下降可能导致未来几个月消费支出放缓，对零售行业形成压力' },
+            { tag: '美元汇率', reason: '美国经济前景不确定性增加，可能对美元构成压力' }
+          ]
+        },
+        {
+          source: '数据',
+          date: '2025/3/24',
+          title: '美国5月密歇根大学消费者信心指数终值',
+          summary: '美国5月密歇根大学消费者信心指数预期为76.0，前值为77.2，等待数据公布',
+          actual: 78,
+          expected: 76.0,
+          previous: 77.2,
+          unit: '',
+          impact: 'positive', // 'pending'=未公布, 'positive'=好于预期, 'negative'=差于预期, 'neutral'=符合预期
+          context: '密歇根大学消费者信心指数是衡量美国消费者信心的重要指标，对预测美国未来几个月的消费支出具有重要参考价值。市场预计该数据将小幅下滑，需关注实际数据是否符合预期。',
+          highlights: [
+            { tag: '关注重点', reason: '该指标近期连续下行，若低于预期可能加剧市场对消费前景的担忧' },
+            { tag: '市场情绪', reason: '指标表现将影响对美联储未来政策路径的预期' }
+          ],
+          benefits: [
+            { tag: '可能利好', reason: '若数据好于预期，将提振消费者支出预期，利好零售板块' }
+          ],
+          drawbacks: [
+            { tag: '潜在风险', reason: '若数据大幅低于预期，可能加剧经济放缓担忧' }
+          ]
         }
-      ]
+      ].sort((a, b) => new Date(b.date) - new Date(a.date))
     }
   },
   methods: {

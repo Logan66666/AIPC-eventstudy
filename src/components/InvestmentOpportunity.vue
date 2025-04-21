@@ -306,13 +306,22 @@ export default {
     
     .event-summary {
       margin: 0;
-        font-size: 12px;
+      font-size: 12px;
       color: var(--hx-text-color-secondary);
       line-height: 1.5;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+  }
+
+  // 展开状态下移除行数限制
+  .timeline-item.expanded {
+    .event-summary {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
     }
   }
 }

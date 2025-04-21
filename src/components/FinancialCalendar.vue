@@ -2,8 +2,8 @@
   <div class="financial-calendar card">
     <div class="calendar-header">
       <div class="header-main">
-        <h2 class="card-title secondary-title">财经日历</h2>
-        <div class="card-subtitle">重要经济数据与财报发布安排</div>
+        <h2 class="card-title secondary-title">投资日历</h2>
+        <div class="card-subtitle">重要经济数据与投资事件安排</div>
       </div>
       
       <!-- 添加筛选下拉菜单 -->
@@ -78,8 +78,9 @@ export default {
         },
         locale: 'zh-cn',
         firstDay: 0,
-        dayMaxEvents: 5,
+        dayMaxEvents: 3,
         height: 'auto',
+        fixedWeekCount: false,
         eventDisplay: 'block',
         eventTimeFormat: {
           hour: '2-digit',
@@ -116,8 +117,8 @@ export default {
     // 修改类别选项
     categoryOptions() {
       return [
-        { label: '财经', value: '财经', badgeClass: 'global' },
-        { label: '行业', value: '行业', badgeClass: 'industry' }
+        { label: '经济事件', value: '经济', badgeClass: 'global' },
+        { label: '投资事件', value: '行业', badgeClass: 'industry' }
       ];
     },
     
@@ -160,7 +161,14 @@ export default {
         this.fixBorderGaps();
         this.fixCalendarBackground();
       }, 100);
+      
+      // 添加点击事件监听器
+      document.addEventListener('mousedown', this.handleClickOutside);
     });
+  },
+  beforeDestroy() {
+    // 组件销毁前移除事件监听器
+    document.removeEventListener('mousedown', this.handleClickOutside);
   },
   methods: {
     // 初始化日历
@@ -273,7 +281,7 @@ export default {
                 title: event.event,
                 description: `${event.event} (预期值: ${event.qz || '-'}, 前值: ${event.ycz || '-'})`,
                 importance: parseInt(event.importanceEn) || 2,
-                category: '财经',
+                category: '经济',
                 time: event.time
               };
               
@@ -308,7 +316,7 @@ export default {
       const eventId = `${dateStr}_${event.category}_${event.title}`.replace(/\s+/g, '_');
 
       return {
-        id: eventId, // 添加唯一ID
+        id: eventId,
         title: displayTitle,
         start: event.date.toISOString().split('T')[0],
         description: event.description,
@@ -567,6 +575,17 @@ export default {
           overlay.style.pointerEvents = 'none';
           viewHarness.style.position = 'relative';
           viewHarness.appendChild(overlay);
+        }
+      }
+    },
+    // 处理点击空白处
+    handleClickOutside(event) {
+      if (this.selectedEvent) {
+        // 获取事件弹窗元素
+        const popup = this.$el.querySelector('.event-popup');
+        // 如果点击的不是弹窗内的元素，则关闭弹窗
+        if (popup && !popup.contains(event.target)) {
+          this.selectedEvent = null;
         }
       }
     },
@@ -888,6 +907,7 @@ export default {
       margin-bottom: 4px !important;
       padding: 3px 4px !important;
       line-height: 1.4 !important;
+      font-size: 12px !important;
     }
     
     .fc-event {
@@ -903,28 +923,17 @@ export default {
       transition: none;
       line-height: 1.3;
       
-      &:hover {
-        transform: none;
-        box-shadow: none;
-        background-color: var(--hx-bg-color-specialcomponent) !important;
-      }
-      
-      .fc-event-main {
-        color: var(--hx-text-color-primary);
-        padding: 0;
-      }
-      
       .fc-event-title {
-        white-space: normal; /* 允许换行 */
+        white-space: normal;
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: normal;
-        padding: 1px 0;
-        /* 限制为最多两行 */
+        padding: 2px 0;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        max-height: 2.8em; /* 增加行高 */
+        max-height: 2.8em;
+        font-size: 12px;
       }
       
       // 修改财经事件的装饰条颜色
@@ -967,7 +976,7 @@ export default {
     }
     
     .fc-daygrid-more-link {
-      font-size: 10px;
+      font-size: 12px;
       padding: 0 2px;
       margin-top: 0;
       line-height: 1.3;
@@ -1201,7 +1210,7 @@ export default {
       }
       
       .fc-event {
-        font-size: 10px;
+        font-size: 12px;
         padding: 1px 2px;
       }
     }
@@ -1210,7 +1219,7 @@ export default {
       width: 220px;
       
       .popup-header {
-        padding: 10px 12px 6px;
+        padding: 12px 12px 6px;
         
         .event-title {
           font-size: 13px;
@@ -1261,7 +1270,7 @@ export default {
     background-color: transparent !important;
   }
   
-  .fc-popover .fc-event[data-category="财经"] {
+  .fc-popover .fc-event[data-category="经济"] {
     border-left-color: var(--hx-brand-color-3) !important;
   }
   
